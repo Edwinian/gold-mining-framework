@@ -39,9 +39,9 @@ python -m idea_generation_agent.invoke "Health"
 python -m idea_generation_agent.invoke alternative medicine
 ```
 
-Run the full pipeline from the parent of this directory (`cd ..`):
+Run the graph from this directory:
 
 ```bash
-python -m gold_mining_framework "Health"
-python -m gold_mining_framework alternative medicine
+python -m gold_mining_framework --idea=coparenting
+python -m gold_mining_framework --idea "alternative medicine"
 ```

@@ -2,10 +2,15 @@
 
 import json
 import os
+from pathlib import Path
 from typing import Literal
 
+from dotenv import load_dotenv
 from langchain_core.tools import tool
 from tavily import TavilyClient  # type: ignore[import-untyped]
+
+# Repo-root .env. This tool does not import llm.py, which otherwise loads it.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 
 def _summarize_results(payload: dict) -> str:
