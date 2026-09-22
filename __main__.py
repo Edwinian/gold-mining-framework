@@ -25,7 +25,7 @@ from gold_mining_framework.graph import graph  # noqa: E402
 def main() -> None:
     """Invoke the pipeline with a market idea from the command line."""
     parser = argparse.ArgumentParser(
-        description="Search Reddit for posts about a market idea."
+        description="Find market gaps for a market idea."
     )
     parser.add_argument(
         "--idea",
@@ -38,9 +38,9 @@ def main() -> None:
         parser.error("--idea must not be empty")
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    logging.info("Searching Reddit and extracting pain points for: %s", idea)
+    logging.info("Finding market gaps for: %s", idea)
     result = graph.invoke({"query": idea})
-    print(result.get("pain_points") or "")  # noqa: T201
+    print(result.get("market_gaps") or "")  # noqa: T201
 
 
 if __name__ == "__main__":

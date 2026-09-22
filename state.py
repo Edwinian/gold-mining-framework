@@ -17,6 +17,7 @@ class AppIdeaState(TypedDict):
             Market Idea Generator.
         reddit_posts: Raw content of Reddit pages found for the market idea.
         pain_points: Pain-point analysis written from those Reddit posts.
+        market_gaps: Solution and market-gap analysis written from those pain points.
     """
 
     query: str
@@ -24,3 +25,4 @@ class AppIdeaState(TypedDict):
     market_hierarchy: NotRequired[str]
     reddit_posts: NotRequired[list[str]]
     pain_points: NotRequired[str]
+    market_gaps: NotRequired[str]
