@@ -5,7 +5,7 @@ from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
 from gold_mining_framework.llm import get_chat_model
-from gold_mining_framework.agents.tools.web_search import web_search
+from gold_mining_framework.agent_nodes.tools.web_search import web_search
 
 # Small model used only to judge a trend snippet. The pipeline agents keep grok-4.7.
 SMALL_MODEL = "xai:grok-3-mini"

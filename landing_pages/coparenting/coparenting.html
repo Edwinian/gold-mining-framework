@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Parallel — Needs-only for now. Kids cared for.</title>
+  <meta name="description" content="Parallel is the parallel-first system for separated parents. Stay on needs-only communication, keep house routines private, and move pickup, school, and medication facts without requiring friendship.">
+  <meta name="theme-color" content="#14382c">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314382c'/%3E%3Cpath d='M8 16h16' stroke='%23f3eee6' stroke-width='2'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --paper: #f3eee6;
+      --paper-deep: #e7dfd3;
+      --white: #fffcf8;
+      --ink: #1c1915;
+      --ink-soft: #3f3a34;
+      --line: #ddd4c8;
+      --forest: #14382c;
+      --forest-deep: #0e2a21;
+      --moss: #2f6a52;
+      --shadow: 0 22px 50px rgba(28, 25, 21, 0.08);
+      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
+      --sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      --radius: 1.25rem;
+      --header: 4.25rem;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+      text-rendering: optimizeLegibility;
+    }
+
+    img, svg, pre { max-width: 100%; }
+
+    h1, h2, h3, p { overflow-wrap: break-word; }
+
+    h1, h2, h3 {
+      font-family: var(--serif);
+      font-weight: 550;
+      letter-spacing: -0.03em;
+      line-height: 1.08;
+      margin: 0;
+    }
+
+    p { margin: 0; }
+
+    a { color: var(--forest); }
+
+    :focus-visible {
+      outline: 3px solid var(--forest);
+      outline-offset: 3px;
+    }
+
+    .skip {
+      position: absolute;
+      left: 1rem;
+      top: -4rem;
+      z-index: 20;
+      background: var(--white);
+      color: var(--ink);
+      padding: 0.6rem 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .skip:focus { top: 1rem; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .container {
+      width: min(1080px, calc(100% - 2rem));
+      margin-inline: auto;
+    }
+
+    section[id], .final[id] { scroll-margin-top: 5.25rem; }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      height: var(--header);
+      display: flex;
+      align-items: center;
+      background: rgba(243, 238, 230, 0.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      width: min(1080px, calc(100% - 2rem));
+    }
+
+    .logo {
+      color: var(--ink);
+      text-decoration: none;
+      font-family: var(--serif);
+      font-size: 1.45rem;
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+    }
+
+    .logo-mark {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-left: 0.35rem;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 1.15rem;
+    }
+
+    .nav a {
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+
+    .nav a:hover { text-decoration: underline; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0.85rem 1.3rem;
+      border-radius: 999px;
+      border: 2px solid transparent;
+      font: 650 1rem/1 var(--sans);
+      text-decoration: none;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-primary {
+      background: var(--forest);
+      color: #f7f3ec;
+    }
+
+    .btn-primary:hover { background: var(--forest-deep); }
+
+    .btn-primary:focus-visible { outline-color: #f3eee6; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--forest);
+      border-color: var(--forest);
+    }
+
+    .btn-ghost:hover { background: rgba(20, 56, 44, 0.06); }
+
+    .btn-light {
+      background: #f7f3ec;
+      color: var(--forest);
+    }
+
+    .btn-light:hover { background: #fff; }
+
+    .btn-light:focus-visible { outline-color: #f7f3ec; }
+
+    .btn-small {
+      min-height: 42px;
+      padding: 0.55rem 0.95rem;
+      font-size: 0.92rem;
+      background: var(--forest);
+      color: #f7f3ec;
+    }
+
+    .btn-small:hover { background: var(--forest-deep); }
+
+    .hero { padding: 2.5rem 0 4rem; }
+
+    .eyebrow {
+      margin: 0 0 1rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--forest);
+    }
+
+    h1 {
+      font-size: clamp(2.35rem, 6.4vw, 4.5rem);
+      max-width: 11ch;
+    }
+
+    .lede {
+      margin-top: 1.25rem;
+      max-width: 42rem;
+      font-size: 1.15rem;
+      color: var(--ink-soft);
+    }
+
+    .benefits {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0 0;
+      display: grid;
+      gap: 0.75rem;
+      max-width: 40rem;
+    }
+
+    .benefits li {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      color: var(--ink);
+    }
+
+    .benefits li::before {
+      content: "";
+      width: 0.55rem;
+      height: 0.55rem;
+      margin-top: 0.5rem;
+      border-radius: 50%;
+      background: var(--forest);
+      flex: none;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.75rem;
+      align-items: center;
+    }
+
+    .micro {
+      margin-top: 0.85rem;
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .mode-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.35rem 1.35rem 1.1rem;
+    }
+
+    .mode-card header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: baseline;
+      margin-bottom: 1rem;
+    }
+
+    .mode-card h2 {
+      font-size: 1.55rem;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--forest);
+      background: #e5f0ea;
+      border-radius: 999px;
+      padding: 0.3rem 0.6rem;
+      white-space: nowrap;
+    }
+
+    .mode-card dl {
+      margin: 0;
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .mode-card dl div {
+      display: grid;
+      grid-template-columns: 5.5rem 1fr;
+      gap: 0.75rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .mode-card dt {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+
+    .mode-card dd { margin: 0; }
+
+    .locked {
+      color: var(--ink-soft);
+    }
+
+    .band { padding: 4.5rem 0; }
+
+    .before { background: var(--paper-deep); }
+
+    .after { background: var(--white); }
+
+    .section-title {
+      font-size: clamp(2rem, 4.5vw, 3.35rem);
+      max-width: 16ch;
+      margin-bottom: 1.5rem;
+    }
+
+    .prose {
+      display: grid;
+      gap: 1.15rem;
+      max-width: 44rem;
+    }
+
+    .prose p { color: var(--ink); }
+
+    blockquote {
+      margin: 1.75rem 0 0;
+      padding: 1.25rem 0 0;
+      border-top: 2px solid var(--forest);
+      max-width: 38rem;
+    }
+
+    blockquote p {
+      font-family: var(--serif);
+      font-size: clamp(1.45rem, 3vw, 1.9rem);
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    blockquote footer {
+      margin-top: 0.75rem;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+    }
+
+    .belief {
+      margin-top: 2.5rem;
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      border: 1px solid var(--line);
+      max-width: 48rem;
+    }
+
+    .belief h3 {
+      font-size: 1.7rem;
+      margin-bottom: 0.85rem;
+      max-width: 20ch;
+    }
+
+    .outcomes, .steps {
+      display: grid;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .card {
+      background: var(--paper);
+      border-radius: var(--radius);
+      padding: 1.35rem;
+      border: 1px solid var(--line);
+    }
+
+    .after .card { background: var(--paper); }
+
+    .card .kicker {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--forest);
+      margin-bottom: 0.7rem;
+    }
+
+    .card h3 {
+      font-size: 1.55rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .paradigm {
+      margin-top: 2.5rem;
+      max-width: 46rem;
+    }
+
+    .paradigm h3 {
+      font-size: clamp(1.7rem, 3vw, 2.2rem);
+      margin: 0.4rem 0 0.9rem;
+    }
+
+    .states {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0 0;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .states li {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 0.95rem 1rem;
+      display: grid;
+      gap: 0.2rem;
+    }
+
+    .states strong { font-family: var(--serif); font-size: 1.25rem; }
+
+    .states span { color: var(--ink-soft); }
+
+    .states .is-current {
+      background: var(--forest);
+      color: #f7f3ec;
+      border-color: var(--forest);
+    }
+
+    .states .is-current span { color: #e4efe9; }
+
+    .product-intro {
+      display: grid;
+      gap: 1rem;
+      max-width: 42rem;
+    }
+
+    .product-intro h2 { font-size: clamp(2.1rem, 5vw, 3.4rem); }
+
+    .steps { margin-top: 1.5rem; }
+
+    .step-no {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      color: var(--forest);
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    .founder {
+      margin-top: 2.5rem;
+      max-width: 42rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .founder h3 { font-size: 1.7rem; margin-bottom: 0.9rem; }
+
+    .founder p + p { margin-top: 0.9rem; }
+
+    .limit {
+      margin-top: 1.25rem;
+      padding: 1rem 1.1rem;
+      border-left: 4px solid var(--forest);
+      background: var(--paper-deep);
+      color: var(--ink);
+    }
+
+    .final {
+      background: var(--forest);
+      color: #f7f3ec;
+      padding: 4.5rem 0;
+    }
+
+    .final h2 {
+      font-size: clamp(2.1rem, 5vw, 3.5rem);
+      max-width: 14ch;
+      color: #f7f3ec;
+    }
+
+    .final .lede { color: #e5efe9; }
+
+    .final :focus-visible { outline-color: #f7f3ec; }
+
+    .plan {
+      margin-top: 1.75rem;
+      background: #f7f3ec;
+      color: var(--ink);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+
+    .plan h3 {
+      font-size: 1.45rem;
+      margin-bottom: 0.8rem;
+    }
+
+    #plan-text {
+      margin: 0;
+      white-space: pre-wrap;
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      line-height: 1.45;
+    }
+
+    fieldset {
+      margin: 1.25rem 0 0;
+      padding: 0;
+      border: 0;
+    }
+
+    legend {
+      font-weight: 700;
+      margin-bottom: 0.7rem;
+    }
+
+    .check {
+      display: flex;
+      gap: 0.7rem;
+      align-items: flex-start;
+      margin: 0.55rem 0;
+      color: var(--ink);
+    }
+
+    .check input {
+      width: 1.15rem;
+      height: 1.15rem;
+      margin-top: 0.25rem;
+      accent-color: var(--forest);
+      flex: none;
+    }
+
+    #mode-status {
+      min-height: 1.5rem;
+      margin-top: 0.4rem;
+      color: var(--forest);
+      font-weight: 650;
+    }
+
+    .final-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.15rem;
+    }
+
+    .fine {
+      margin-top: 1rem;
+      color: #d5e4dc;
+      font-size: 0.95rem;
+      max-width: 42rem;
+    }
+
+    .site-footer {
+      padding: 2rem 0 2.5rem;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+    }
+
+    .site-footer p + p { margin-top: 0.6rem; }
+
+    @media (min-width: 800px) {
+      .hero { padding: 4rem 0 5.5rem; }
+      .hero-grid {
+        grid-template-columns: 1.15fr 0.85fr;
+        align-items: center;
+        gap: 3rem;
+      }
+      .outcomes, .steps, .states { grid-template-columns: repeat(3, 1fr); }
+      .states { grid-template-columns: repeat(4, 1fr); }
+      .belief { padding: 2rem; }
+    }
+
+    @media (max-width: 720px) {
+      .nav-quiet { display: none; }
+      .mode-card dl div { grid-template-columns: 1fr; gap: 0.15rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+
+    @media print {
+      .site-header, .skip, .no-print, .hero-actions, .final-actions { display: none !important; }
+      body, .before, .after, .final { background: #fff !important; color: #000 !important; }
+      .final h2, .final .lede, .fine { color: #000 !important; }
+      .plan { border: 1px solid #000; }
+      a { color: #000; text-decoration: none; }
+    }
+  </style>
+</head>
+<body id="top">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo" href="#top">Parallel<span class="logo-mark">for now</span></a>
+      <nav class="nav" aria-label="Page">
+        <a class="nav-quiet" href="#before">The before</a>
+        <a class="nav-quiet" href="#after">The after</a>
+        <a class="nav-quiet" href="#product">The system</a>
+        <a class="btn btn-small" href="#start">Start</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow">For separated parents, not a fantasy team</p>
+          <h1 id="hero-title">It’s all very transactional and raw right now.</h1>
+          <p class="lede">For parents who are still on needs-only communication — parallel parenting, not a team — and need the kids loved and cared for without forcing a conversation you are not ready to have. Parallel starts there. It does not ask you to become friends first.</p>
+          <ul class="benefits">
+            <li>A visible mode: parallel for now, not a coparenting workspace in week three.</li>
+            <li>Needs-only templates for pickup, school, and medication. No tone channel. No nitpicking.</li>
+            <li>One parent can pay and run it. The other never has to join, and cannot shut it off.</li>
+            <li>House routines stay private. A day-90 revisit you are allowed to skip.</li>
+          </ul>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#start">Start the 90-day protocol</a>
+            <a class="btn btn-ghost" href="#product">See how parallel mode works</a>
+          </div>
+          <p class="micro">You don’t have to like your business partner. You do have to move pickup, school, and medication without a fight.</p>
+        </div>
+        <aside class="mode-card" aria-label="Preview of parallel mode">
+          <header>
+            <h2>Parallel for now</h2>
+            <span class="pill">Week 3 is allowed</span>
+          </header>
+          <dl>
+            <div>
+              <dt>Joint only</dt>
+              <dd>Medical, school, pickup, agreed activities</dd>
+            </div>
+            <div>
+              <dt>Private</dt>
+              <dd>Bedtime, screens, meals, each house’s routines</dd>
+            </div>
+            <div>
+              <dt>Closed</dt>
+              <dd>Tone, the relationship, and “how it should be”</dd>
+            </div>
+            <div>
+              <dt>Revisit</dt>
+              <dd>Day 90. Come back in a year if that is the truth. No change is allowed.</dd>
+            </div>
+            <div>
+              <dt>Cooperative</dt>
+              <dd class="locked">Locked until both of you opt in. One person cannot turn it on.</dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <section class="band before" id="before" aria-labelledby="before-title">
+      <div class="container">
+        <p class="eyebrow">The before</p>
+        <h2 class="section-title" id="before-title">You are not failing at coparenting. You are not in that place yet.</h2>
+        <div class="prose">
+          <p>Week three. It is messy. Your ex is on needs-only communication, and so are you. The divorce application might not even be accepted yet. At the start, someone talked about being awesome coparents. You just don’t think you are in that place. You are figuring out your own routines, trying to keep the kids loved and cared for, and hoping for a stretch of time without conflict. Opening a conversation about how it should be feels impossible, because it is.</p>
+          <p>So you do the thing that actually protects their stability. Parallel parenting, without the fight. You do your thing at your house. They do theirs at theirs. Minimal communication, reserved for the necessities. You might still want to coparent. Both of you might. The split is too raw to force it, so you focus on the kids’ stability and comfort, and on the share of care you actually have — even when that share is nothing like 50/50. “Come back in a year” sounds like a brush-off. It is also the only honest timeline.</p>
+          <p>Sometimes the word itself is the lie. They moved hours away and show up once or twice a year, while you still send the medical and school updates. Or they have decided that anything on their time is not yours to know, including medication. That is not a scheduling annoyance, and it is not a friendship problem. A product that only works when both adults log in, in good faith, has already failed you.</p>
+        </div>
+        <blockquote>
+          <p>Initially she talked about being awesome co-parents. I just don’t think we are in that place yet.</p>
+          <footer>In a parent’s words, while the split was still new.</footer>
+        </blockquote>
+        <div class="belief">
+          <h3>Why the last solution failed</h3>
+          <p>The idea of coparenting and the reality are massively skewed. People are sold two homes, one team, matching bedtimes, matching screen time, a shared mood. There is a reason you could not stay together. Parenting approaches and styles may have played a part. If you do not agree on the basics, you are not coparenting badly. You are parallel parenting. Different routines are challenging. They can also mean less conflict. The lines have already blurred. Pretending they have not is how the last fix failed — the app, the relative, the group chat that turned into criticism. They all required a partnership you do not have, a second subscription you cannot force, and a friendship nobody is offering. Putting the kids above the dislike is the point. Performing a team is not.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="band after" id="after" aria-labelledby="after-title">
+      <div class="container">
+        <p class="eyebrow">The after</p>
+        <h2 class="section-title" id="after-title">Imagine the logistics moving, and the peace treaty taken off the table.</h2>
+        <div class="outcomes">
+          <article class="card">
+            <p class="kicker">Relief</p>
+            <h3>The big talk is closed on purpose.</h3>
+            <p>For 90 days, communication stays needs-only. Pickup. School. Medication. Care. Nobody is grading your tone or asking you to articulate the whole future in one message. Space is part of the plan, not a delay you have to apologize for.</p>
+          </article>
+          <article class="card">
+            <p class="kicker">Steadiness</p>
+            <h3>The kids are loved in both places, without a performance.</h3>
+            <p>Cordial, not friends. You can show up where it matters and not share the holiday. House rules can differ. Matching homes is not the measure of whether they are cared for. Less conflict can be worth the inconsistency.</p>
+          </article>
+          <article class="card">
+            <p class="kicker">Agency</p>
+            <h3>The record holds if you are the only one here.</h3>
+            <p>If you are doing the parenting while they visit once or twice a year, you are not waiting on their mood or their subscription. What you sent is written down. What they never acknowledged is written down. What happened in their house is not invented, and not watched.</p>
+          </article>
+        </div>
+        <div class="paradigm">
+          <p class="eyebrow">A better way</p>
+          <h3>Mode, not morale.</h3>
+          <p>The better way is not a nicer shared calendar and not a lecture about putting the kids first. It is a state you can name. Raw, while it is new. Parallel, as the default — and maybe forever. A few joint decisions, only where you both actually agree. Cooperative, only if both of you opt in later. Parallel is not the downgrade you get when coparenting fails. It is the honest operating system for a split that is still a split.</p>
+        </div>
+        <ol class="states">
+          <li>
+            <strong>Raw</strong>
+            <span>Days to months. Needs only. No philosophy thread.</span>
+          </li>
+          <li class="is-current">
+            <strong>Parallel</strong>
+            <span>The default. May be permanent. Each house runs itself.</span>
+          </li>
+          <li>
+            <strong>Selective</strong>
+            <span>Medical, school, an activity — only if you both agree.</span>
+          </li>
+          <li>
+            <strong>Cooperative</strong>
+            <span>A promotion you both accept. Never a setting one person flips.</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="band" id="product" aria-labelledby="product-title">
+      <div class="container">
+        <p class="eyebrow">The system</p>
+        <div class="product-intro">
+          <h2 id="product-title">Introducing Parallel</h2>
+          <p>The parallel-first system for separated homes. It starts in needs-only mode, keeps each house private, and moves the facts that can hurt a child — medication, school, pickup — without requiring friendship, a matching bedtime, or a second willing adult.</p>
+          <p>Built to be handed across a desk at the first meeting, not discovered in an app store at midnight. Our price does not depend on you becoming cooperative. You are allowed to stay in parallel.</p>
+        </div>
+        <div class="steps">
+          <article class="card">
+            <span class="step-no">1</span>
+            <h3>Name the mode.</h3>
+            <p>Parallel for now. A 90-day freeze on “how it should be.” Cooperative stays locked until both of you opt in. Skipping the revisit is a valid result, not a missed assignment.</p>
+          </article>
+          <article class="card">
+            <span class="step-no">2</span>
+            <h3>Move necessities only.</h3>
+            <p>Pickup, school, a medication change. Short templates. No criticism thread hiding in the same chat as a dose. House rules stay in your house. They are not synced, and they are not a scoreboard.</p>
+          </article>
+          <article class="card">
+            <span class="step-no">3</span>
+            <h3>Keep the record if you are alone in it.</h3>
+            <p>You log what you sent, and whether it was acknowledged. Silence is a timestamp, not a story about their house. They get a free door. They cannot cancel yours. You can hand the chronology to a family lawyer. That is a record of attempts, not a promise a court will treat it a certain way.</p>
+          </article>
+        </div>
+        <div class="founder">
+          <h3>A note from us</h3>
+          <p>We did not build another app that opens on a shared vision board. The parents who shaped Parallel were clear. Time without conflict is the point. Keep the kids loved and cared for. Figure out your own routines. Come back in a year if you want to. Some of them were three weeks in, transactional and raw, with paperwork not even accepted. Some were already doing all the parenting while the other name on the order lived a day’s drive away.</p>
+          <p>Parallel is that interval, made into a system. It will not grade you for refusing to match screen time. It will not die because the other parent will not pay. And it will not offer you a window into their house, their phone, or your child as a messenger.</p>
+          <p class="limit">If a child is unsafe, this is the wrong tool. Contact a family lawyer, a mediator, or child-protection services. A message log does not make dosing safe, does not lessen abuse, and will not create a careful or willing partner. Parallel records what you sent. It does not watch the other home, and it should not be used to ask a child what the other parent did.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="final" id="start" aria-labelledby="start-title">
+      <div class="container">
+        <p class="eyebrow" style="color:#cfe0d7">Before the next handoff</p>
+        <h2 id="start-title">Set the mode while the only honest topic is still what the kids need tonight.</h2>
+        <p class="lede">The big conversation can wait. The pickup time cannot. Put “how it should be” on a 90-day freeze, keep the channel needs-only, and revisit later — or don’t. No scarcity trick. Just the next exchange.</p>
+        <div class="plan">
+          <h3>Your one-page plan</h3>
+          <pre id="plan-text">PARALLEL — 90 DAYS
+
+Mode: parallel for now. Not coparenting. Not a failed team.
+Joint only: medical, education, pickup, agreed activities.
+House-level, not synced: bedtime, screens, meals, routines.
+Do not discuss: tone, the relationship, how it should be.
+Communication: needs only. No nitpicking unless it is safety.
+Revisit: day 90. No change is a valid result. Come back in a year if that is righter.
+Record: what was sent, when, and whether it was acknowledged.
+Do not infer what happened on the other parent’s time.
+Do not monitor the other home. Do not ask the child to report.
+
+This is not legal advice, not a court guarantee, and not an emergency service.
+If a child is unsafe, contact a family lawyer, a mediator, or child-protection services.</pre>
+          <fieldset id="commit">
+            <legend>Mark it, if you mean it</legend>
+            <label class="check">
+              <input type="checkbox" name="commit" value="mode">
+              <span>We are in parallel mode. I will not force the coparenting conversation yet.</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" name="commit" value="joint">
+              <span>Joint only where it has to be: medical, school, pickup.</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" name="commit" value="house">
+              <span>House rules stay private. Different bedtimes are not a failure.</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" name="commit" value="boundary">
+              <span>I will not use this to watch the other house or to quiz my child.</span>
+            </label>
+          </fieldset>
+          <div id="mode-status" role="status" aria-live="polite"></div>
+          <div class="final-actions no-print">
+            <a class="btn btn-light" href="mailto:?subject=Parallel%20mode%20for%2090%20days&amp;body=PARALLEL%20%E2%80%94%2090%20DAYS%0A%0AMode%3A%20parallel%20for%20now.%20Not%20coparenting.%0AJoint%20only%3A%20medical%2C%20education%2C%20pickup%2C%20agreed%20activities.%0AHouse-level%2C%20not%20synced%3A%20bedtime%2C%20screens%2C%20meals%2C%20routines.%0ADo%20not%20discuss%3A%20tone%2C%20the%20relationship%2C%20how%20it%20should%20be.%0ARevisit%3A%20day%2090.%20No%20change%20is%20a%20valid%20result.%0ARecord%20what%20was%20sent%20and%20whether%20it%20was%20acknowledged.%0ADo%20not%20monitor%20the%20other%20home%20or%20ask%20the%20child%20to%20report.%0A%0ANot%20legal%20advice.%20If%20a%20child%20is%20unsafe%2C%20contact%20a%20family%20lawyer%2C%20a%20mediator%2C%20or%20child-protection%20services.">Email myself the protocol</a>
+            <button class="btn btn-ghost" id="copy-plan" type="button" style="border-color:#f7f3ec;color:#f7f3ec">Copy the plan</button>
+            <button class="btn btn-ghost" id="print-plan" type="button" style="border-color:#f7f3ec;color:#f7f3ec">Print the one-page plan</button>
+          </div>
+        </div>
+        <p class="fine">One payer. A free door for the other parent. No upgrade to unlock them. No location, no audio, no view of their house. If they never log in, your protocol still stands.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Parallel is a needs-only system for separated parents. It is not a law firm, not a mediator, and not an emergency service. Nothing here is legal, medical, or child-protection advice.</p>
+      <p>It does not claim to make an unwilling parent cooperate, to make medication safe, or to be admitted in court. It will not sell you a way to monitor the other household or to use a child as the source. If a child is in danger, contact a family lawyer, a mediator, or child-protection services.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var boxes = document.querySelectorAll("#commit input[type='checkbox']");
+      var status = document.getElementById("mode-status");
+      var copyBtn = document.getElementById("copy-plan");
+      var printBtn = document.getElementById("print-plan");
+      var plan = document.getElementById("plan-text");
+
+      function update() {
+        var done = 0;
+        var i;
+        for (i = 0; i < boxes.length; i++) {
+          if (boxes[i].checked) done += 1;
+        }
+        if (done === boxes.length && boxes.length) {
+          status.textContent = "Parallel mode is set for 90 days. Copy or print the plan, and leave the big conversation closed.";
+        } else if (done) {
+          status.textContent = done + " of " + boxes.length + " marked. The plan is yours either way.";
+        } else {
+          status.textContent = "";
+        }
+      }
+
+      var j;
+      for (j = 0; j < boxes.length; j++) {
+        boxes[j].addEventListener("change", update);
+      }
+
+      if (copyBtn && plan) {
+        copyBtn.addEventListener("click", function () {
+          var text = plan.textContent;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+              copyBtn.textContent = "Copied";
+            }).catch(function () {
+              copyBtn.textContent = "Select the plan and copy it";
+            });
+          } else {
+            copyBtn.textContent = "Select the plan and copy it";
+          }
+        });
+      }
+
+      if (printBtn) {
+        printBtn.addEventListener("click", function () {
+          window.print();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

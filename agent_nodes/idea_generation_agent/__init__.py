@@ -1,6 +1,6 @@
 """Idea generation agent node for the linear gold mining graph."""
 
-from gold_mining_framework.agents.idea_generation_agent.harness import (
+from gold_mining_framework.agent_nodes.idea_generation_agent.harness import (
     build_harness,
     run_harness,
 )

@@ -14,7 +14,7 @@ import warnings
 warnings.filterwarnings("ignore", message="LangSmith now uses UUID v7")
 
 # Package import applies the allowed_objects filter after langchain_core loads.
-from gold_mining_framework.agents.idea_generation_agent import (  # noqa: E402
+from gold_mining_framework.agent_nodes.idea_generation_agent import (  # noqa: E402
     idea_generation_agent,
 )
 

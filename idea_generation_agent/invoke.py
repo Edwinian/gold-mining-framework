@@ -14,7 +14,7 @@ _package_parent = str(Path(__file__).resolve().parents[1].parent)
 if _package_parent not in sys.path:
     sys.path.insert(0, _package_parent)
 
-from gold_mining_framework.agents.idea_generation_agent.invoke import main
+from gold_mining_framework.agent_nodes.idea_generation_agent.invoke import main
 
 if __name__ == "__main__":
     main()

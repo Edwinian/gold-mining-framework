@@ -11,7 +11,7 @@ class AppIdeaState(TypedDict):
     """Shared state passed along the linear agent pipeline.
 
     Attributes:
-        query: Market idea supplied via ``invoke``.
+        query: Market idea. The Reddit query agent writes the trimmed idea here.
         messages: Conversation trace for agent nodes that keep a message history.
         market_hierarchy: Validated market / category / niche tree from the
             Market Idea Generator.

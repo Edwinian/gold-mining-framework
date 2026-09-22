@@ -8,15 +8,15 @@ from urllib.parse import urlparse
 from pydantic import BaseModel, Field
 from tavily import TavilyClient  # type: ignore[import-untyped]
 
-from gold_mining_framework.agents.idea_picker_agent.prompt import (
+from gold_mining_framework.agent_nodes.idea_picker_agent.prompt import (
     IDEA_SOURCES,
     SELECT_PROMPT,
 )
-from gold_mining_framework.agents.tools.google_trends_filter import (
+from gold_mining_framework.agent_nodes.tools.google_trends_filter import (
     google_trends_filter,
 )
 from gold_mining_framework.llm import get_chat_model
-from gold_mining_framework.agents.tools.web_search import _summarize_results
+from gold_mining_framework.agent_nodes.tools.web_search import _summarize_results
 
 logger = logging.getLogger(__name__)
 

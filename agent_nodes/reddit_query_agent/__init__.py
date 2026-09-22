@@ -6,7 +6,7 @@ This node is invoked by the graph, not as its own command.
 
 import json
 
-from gold_mining_framework.agents.tools.web_search import web_search
+from gold_mining_framework.agent_nodes.tools.web_search import web_search
 from gold_mining_framework.state import AppIdeaState
 
 
@@ -17,7 +17,8 @@ def reddit_query_agent(state: AppIdeaState) -> dict:
         state: Graph state. ``query`` is the market idea.
 
     Returns:
-        An update that sets ``reddit_posts`` to the raw content of each hit.
+        An update that sets ``query`` to the market idea and ``reddit_posts``
+        to the raw content of each hit.
     """
     idea = (state.get("query") or "").strip()
     if not idea:
@@ -39,7 +40,7 @@ def reddit_query_agent(state: AppIdeaState) -> dict:
         for result in payload.get("results") or []
         if result.get("raw_content")
     ]
-    return {"reddit_posts": reddit_posts}
+    return {"query": idea, "reddit_posts": reddit_posts}
 
 
 __all__ = ["reddit_query_agent"]

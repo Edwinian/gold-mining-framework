@@ -7,8 +7,8 @@ from langgraph.graph import START, MessagesState, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from gold_mining_framework.agents.idea_generation_agent.prompt import PROMPT
-from gold_mining_framework.agents.tools.google_trends_filter import (
+from gold_mining_framework.agent_nodes.idea_generation_agent.prompt import PROMPT
+from gold_mining_framework.agent_nodes.tools.google_trends_filter import (
     google_trends_filter,
 )
 from gold_mining_framework.llm import get_chat_model

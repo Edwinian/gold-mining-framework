@@ -12,7 +12,7 @@ import warnings
 
 warnings.filterwarnings("ignore", message="LangSmith now uses UUID v7")
 
-from gold_mining_framework.agents.idea_picker_agent import (  # noqa: E402
+from gold_mining_framework.agent_nodes.idea_picker_agent import (  # noqa: E402
     idea_picker_agent,
 )
 

@@ -4,7 +4,7 @@ Searches Starter Story and IdeaPicker, then keeps ideas whose Google Trends
 line is smoothly upward.
 """
 
-from gold_mining_framework.agents.idea_picker_agent.harness import run_harness
+from gold_mining_framework.agent_nodes.idea_picker_agent.harness import run_harness
 
 DEFAULT_LIMIT = 20
 
