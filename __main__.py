@@ -38,10 +38,9 @@ def main() -> None:
         parser.error("--idea must not be empty")
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    logging.info("Searching Reddit for: %s", idea)
+    logging.info("Searching Reddit and extracting pain points for: %s", idea)
     result = graph.invoke({"query": idea})
-    posts = result.get("reddit_posts") or []
-    print("\n\n".join(posts))  # noqa: T201
+    print(result.get("pain_points") or "")  # noqa: T201
 
 
 if __name__ == "__main__":

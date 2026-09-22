@@ -1,8 +1,8 @@
 # Gold Mining Framework
 
-Linear LangGraph pipeline of specialist agents. The current graph is `START -> reddit_query_agent -> END`.
+Linear LangGraph pipeline of specialist agents. The current graph is `START -> reddit_query_agent -> pain_point_agent -> END`.
 
-The Reddit query agent searches Reddit for the market idea and stores each result's raw page content. The idea generation agent still runs on its own and keeps market categories whose Google Trends (worldwide, since 2004) slope smoothly upward.
+The Reddit query agent searches Reddit for the market idea and stores each result's raw page content. The pain point agent reads those posts and writes a pain-point analysis. The idea generation agent still runs on its own and keeps market categories whose Google Trends (worldwide, since 2004) slope smoothly upward.
 
 Agents currently call **xAI Grok 4.7** (`xai:grok-4.7`).
 
