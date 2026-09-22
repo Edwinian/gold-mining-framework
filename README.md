@@ -49,3 +49,17 @@ Run the graph from this directory:
 python -m gold_mining_framework --idea=coparenting
 python -m gold_mining_framework --idea "alternative medicine"
 ```
+
+## Landing Pages
+
+The graph ends at `landing_page_agent`. That agent reads the market idea, the pain-point analysis, and the market-gap analysis, then writes a folder under `landing_pages`. The folder name is the idea in snake case.
+
+For `python -m gold_mining_framework --idea=coparenting`, the files are:
+
+```text
+landing_pages/coparenting/pain_points.md
+landing_pages/coparenting/market_gaps.md
+landing_pages/coparenting/coparenting.html
+```
+
+`pain_points.md` and `market_gaps.md` are the analyses from the previous agents. `coparenting.html` is a self-contained landing page generated from those analyses. Open that HTML file in a browser. The command itself prints the market-gap analysis to the terminal.
