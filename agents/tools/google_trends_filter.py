@@ -46,13 +46,10 @@ def google_trends_filter(idea: str) -> bool:
     """Check whether an idea's Google Trends line is smoothly upward.
 
     Search the web for the idea's worldwide Google Trends since 2004, then
-    ask a small model whether that trend rises smoothly. Call this only for
-    the lowest-level idea in a branch. If that idea is a sub-niche, pass the
-    sub-niche and do not call this tool for its parent category, subcategory,
-    or niche. Include the idea only when this returns true.
+    ask a small model whether that trend rises smoothly.
 
     Args:
-        idea: Lowest-level market idea to check, such as a sub-niche.
+        idea: Market idea to check.
 
     Returns:
         True when the worldwide trend since 2004 is smoothly upward.
