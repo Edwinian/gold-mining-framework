@@ -7,11 +7,12 @@ from langgraph.graph import START, MessagesState, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from gold_mining_framework.agent_nodes.idea_generation_agent.prompt import PROMPT
 from gold_mining_framework.agent_nodes.tools.google_trends_filter import (
     google_trends_filter,
 )
 from gold_mining_framework.llm import get_chat_model
+
+from .prompt import PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +100,7 @@ def run_harness(query: str, harness: CompiledStateGraph) -> tuple[list, str]:
     """Run the idea generation harness on a market query.
 
     Args:
-        query: Market, category, or focus area from ``graph.invoke``.
+        query: Market, category, or focus area.
         harness: Compiled idea generation subgraph.
 
     Returns:

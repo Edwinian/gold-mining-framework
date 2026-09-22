@@ -2,7 +2,7 @@
 
 Linear LangGraph pipeline of specialist agents. The current graph is `START -> reddit_query_agent -> pain_point_agent -> market_gap_agent -> landing_page_agent -> END`.
 
-The Reddit query agent searches Reddit for the market idea and stores each result's raw page content. The pain point agent reads those posts and writes a pain-point analysis. The market gap agent reads that analysis and writes solution opportunities. The landing page agent writes those analyses and an HTML page under `landing_pages`. The idea generation agent still runs on its own and keeps market categories whose Google Trends (worldwide, since 2004) slope smoothly upward.
+The Reddit query agent searches Reddit for the market idea and stores each result's raw page content. The pain point agent reads those posts and writes a pain-point analysis. The market gap agent reads that analysis and writes solution opportunities. The landing page agent writes those analyses and an HTML page under `landing_pages`. The idea generation agent and the idea picker agent run on their own. Both take an optional `--topic`: `health`, `wealth`, and `relationships` are markets, and any other value is a category. Omit `--topic` for random ideas starting from the market level. Idea generation keeps leaves whose Google Trends (worldwide, since 2004) slope smoothly upward.
 
 Agents currently call **xAI Grok 4.7** (`xai:grok-4.7`).
 
@@ -32,11 +32,15 @@ Gemini uses the `google_genai` prefix so requests go to the Gemini API. Other `i
 
 ## Run
 
-From this directory, invoke the idea generation agent on its own:
+From this directory, invoke the idea agents on their own. `--topic=health` is a market. `--topic="alternative medicine"` is a category. Omit `--topic` for random ideas starting from the market level (Health, Wealth, and Relationships).
 
 ```bash
-python -m idea_generation_agent.invoke "Health"
-python -m idea_generation_agent.invoke alternative medicine
+python -m idea_generation_agent.invoke --topic=health
+python -m idea_generation_agent.invoke --topic="alternative medicine"
+python -m idea_generation_agent.invoke
+python -m idea_picker_agent.invoke --topic=health
+python -m idea_picker_agent.invoke --topic="alternative medicine"
+python -m idea_picker_agent.invoke
 ```
 
 Run the graph from this directory:

@@ -8,15 +8,13 @@ from urllib.parse import urlparse
 from pydantic import BaseModel, Field
 from tavily import TavilyClient  # type: ignore[import-untyped]
 
-from gold_mining_framework.agent_nodes.idea_picker_agent.prompt import (
-    IDEA_SOURCES,
-    SELECT_PROMPT,
-)
 from gold_mining_framework.agent_nodes.tools.google_trends_filter import (
     google_trends_filter,
 )
-from gold_mining_framework.llm import get_chat_model
 from gold_mining_framework.agent_nodes.tools.web_search import _summarize_results
+from gold_mining_framework.llm import get_chat_model
+
+from .prompt import IDEA_SOURCES, SELECT_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +39,29 @@ def _source_domain(url: str) -> str:
     return host
 
 
-def _search_idea_sites(query: str | None, limit: int) -> str:
+def _search_focus(level: str, topic: str | None) -> str:
+    """Return the search phrase for a classified topic.
+
+    Args:
+        level: ``random``, ``market``, or ``category``.
+        topic: Cleaned topic. ``None`` when the level is random.
+
+    Returns:
+        Phrase sent to each idea source.
+    """
+    if level == "market":
+        return f"{topic} market startup business ideas"
+    if level == "category":
+        return f"{topic} category startup business ideas"
+    return "Health Wealth Relationships startup business ideas"
+
+
+def _search_idea_sites(level: str, topic: str | None, limit: int) -> str:
     """Search Starter Story and IdeaPicker for candidate ideas.
 
     Args:
-        query: Optional focus. A broad ideas query is used when this is omitted.
+        level: ``random``, ``market``, or ``category``.
+        topic: Cleaned topic. ``None`` when the level is random.
         limit: How many ideas the caller wants, used to size each search.
 
     Returns:
@@ -56,7 +72,7 @@ def _search_idea_sites(query: str | None, limit: int) -> str:
             "Tavily is not configured. Set TAVILY_API_KEY in the repo-root .env file."
         )
 
-    focus = query or "startup business ideas"
+    focus = _search_focus(level, topic)
     client = TavilyClient()
     max_results = min(20, max(limit, 8))
     sections: list[str] = []
@@ -74,28 +90,34 @@ def _search_idea_sites(query: str | None, limit: int) -> str:
     return "\n\n".join(sections)
 
 
-def _select_ideas(query: str | None, limit: int, search_results: str) -> list[PickedIdea]:
+def _select_ideas(
+    level: str, topic: str | None, limit: int, search_results: str
+) -> list[PickedIdea]:
     """Choose up to ``limit`` ideas from the search results.
 
-    A query keeps the most relevant ideas. Without a query, a larger pool is
-    extracted and ``limit`` ideas are sampled at random.
+    A market or category keeps the most relevant ideas. A random request
+    extracts a larger pool and samples ``limit`` ideas from the market level.
 
     Args:
-        query: Optional focus area. ``None`` selects at random.
+        level: ``random``, ``market``, or ``category``.
+        topic: Cleaned topic. ``None`` when the level is random.
         limit: Maximum number of ideas to return before trend filtering.
         search_results: Combined text from both idea sources.
 
     Returns:
         Selected ideas, at most ``limit`` of them.
     """
-    pool_size = limit if query else max(limit * 2, limit)
-    if query:
-        instruction = (
-            f"Choose the ideas most relevant to this query: {query}."
-        )
+    if level == "market":
+        pool_size = limit
+        instruction = f"Choose the ideas in the {topic} market."
+    elif level == "category":
+        pool_size = limit
+        instruction = f"Choose the ideas in the {topic} category."
     else:
+        pool_size = max(limit * 2, limit)
         instruction = (
-            "List distinct ideas that appear in the results, spread across both sources."
+            "List distinct ideas starting from the market level across "
+            "Health, Wealth, and Relationships."
         )
     selector = get_chat_model().with_structured_output(PickedIdeas)
     decision = selector.invoke(
@@ -118,7 +140,7 @@ def _select_ideas(query: str | None, limit: int, search_results: str) -> list[Pi
         seen.add(key)
         unique.append(idea)
 
-    if query is None and len(unique) > limit:
+    if level == "random" and len(unique) > limit:
         return random.sample(unique, limit)
     return unique[:limit]
 
@@ -132,11 +154,12 @@ def _passes_trend_filter(idea: PickedIdea) -> bool:
     return str(result).strip().lower() == "true"
 
 
-def run_harness(query: str | None, limit: int = 20) -> list[dict]:
+def run_harness(level: str, topic: str | None, limit: int = 20) -> list[dict]:
     """Search both idea sites, pick ideas, and keep upward Google Trends.
 
     Args:
-        query: Optional focus. ``None`` samples ideas at random.
+        level: ``random``, ``market``, or ``category``.
+        topic: Cleaned topic. ``None`` when the level is random.
         limit: How many ideas to check. Defaults to 20.
 
     Returns:
@@ -146,8 +169,8 @@ def run_harness(query: str | None, limit: int = 20) -> list[dict]:
     if limit < 1:
         raise ValueError("limit must be at least 1.")
 
-    search_results = _search_idea_sites(query, limit)
-    selected = _select_ideas(query, limit, search_results)
+    search_results = _search_idea_sites(level, topic, limit)
+    selected = _select_ideas(level, topic, limit, search_results)
     logger.info("Checking %s ideas against Google Trends.", len(selected))
 
     passed: list[dict] = []
