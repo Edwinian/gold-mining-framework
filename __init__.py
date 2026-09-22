@@ -1,7 +1,7 @@
 """Gold mining framework pipeline built with plain LangGraph.
 
 The outer graph is linear (one-way edges). Each node is an agent. The first
-node is the idea generation agent.
+node is the Reddit query agent.
 """
 
 import warnings

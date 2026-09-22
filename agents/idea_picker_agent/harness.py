@@ -16,7 +16,7 @@ from gold_mining_framework.agents.tools.google_trends_filter import (
     google_trends_filter,
 )
 from gold_mining_framework.llm import get_chat_model
-from gold_mining_framework.agents.tools.web_search import _format_search_results
+from gold_mining_framework.agents.tools.web_search import _summarize_results
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ def _search_idea_sites(query: str | None, limit: int) -> str:
             include_domains_mode="restrict",
             topic="general",
         )
-        sections.append(f"Source: {source}\n{_format_search_results(payload)}")
+        sections.append(f"Source: {source}\n{_summarize_results(payload)}")
     return "\n\n".join(sections)
 
 

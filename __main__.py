@@ -1,7 +1,7 @@
-"""CLI entry point for the Market Idea Generator.
+"""CLI entry point for the gold mining graph.
 
 Usage (from the parent of this project directory):
-    python -m gold_mining_framework "Health"
+    python -m gold_mining_framework "coparenting"
     python -m gold_mining_framework alternative medicine
 """
 
@@ -18,22 +18,22 @@ from gold_mining_framework.graph import graph  # noqa: E402
 def main() -> None:
     """Invoke the pipeline with a market query from the command line."""
     parser = argparse.ArgumentParser(
-        description="Run the Market Idea Generator on a market or focus area."
+        description="Search Reddit for posts about a market idea."
     )
     parser.add_argument(
         "query",
         nargs="+",
-        help="Market segment or focus area, e.g. Health or 'alternative medicine'",
+        help="Market idea, e.g. coparenting or 'alternative medicine'",
     )
     args = parser.parse_args()
     query = " ".join(args.query)
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    logging.info("Running Market Idea Generator for: %s", query)
-    logging.info("This can take several minutes (web search + Google Trends checks).")
+    logging.info("Searching Reddit for: %s", query)
     result = graph.invoke({"query": query})
-    print(result["market_hierarchy"])  # noqa: T201
+    posts = result.get("reddit_posts") or []
+    print("\n\n".join(posts))  # noqa: T201
 
 
 if __name__ == "__main__":

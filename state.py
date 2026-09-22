@@ -11,12 +11,14 @@ class AppIdeaState(TypedDict):
     """Shared state passed along the linear agent pipeline.
 
     Attributes:
-        query: Market, category, or focus area supplied via ``invoke``.
-        messages: Conversation trace for the current (and later) agent nodes.
+        query: Market idea supplied via ``invoke``.
+        messages: Conversation trace for agent nodes that keep a message history.
         market_hierarchy: Validated market / category / niche tree from the
             Market Idea Generator.
+        reddit_posts: Raw content of Reddit pages found for the market idea.
     """
 
     query: str
     messages: Annotated[list[AnyMessage], add_messages]
     market_hierarchy: NotRequired[str]
+    reddit_posts: NotRequired[list[str]]

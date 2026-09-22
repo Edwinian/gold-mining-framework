@@ -1,5 +1,6 @@
 """Web search tool for gold mining framework agents."""
 
+import json
 import os
 from typing import Literal
 
@@ -7,7 +8,7 @@ from langchain_core.tools import tool
 from tavily import TavilyClient  # type: ignore[import-untyped]
 
 
-def _format_search_results(payload: dict) -> str:
+def _summarize_results(payload: dict) -> str:
     """Turn a Tavily response into compact text for the agent.
 
     Args:
@@ -40,6 +41,21 @@ def _format_search_results(payload: dict) -> str:
     return "\n".join(lines)
 
 
+def _format_results(payload: dict, output_mode: Literal["summary", "raw"]) -> str:
+    """Return search results as a summary or as raw JSON.
+
+    Args:
+        payload: Filtered Tavily search response.
+        output_mode: ``summary`` for formatted text, ``raw`` for JSON.
+
+    Returns:
+        The formatted summary, or ``json.dumps(payload)`` when the format is raw.
+    """
+    if output_mode == "raw":
+        return json.dumps(payload)
+    return _summarize_results(payload)
+
+
 @tool(parse_docstring=True)
 def web_search(
     query: str,
@@ -68,6 +84,7 @@ def web_search(
     language: str | None = None,
     filter_by_language: bool | None = None,
     min_relevance_score: float = 0.80,
+    output_mode: Literal["summary", "raw"] = "summary",
 ) -> str:
     """Search the web for current information on a topic.
 
@@ -98,9 +115,12 @@ def web_search(
         language: Language of the results.
         filter_by_language: Keep only results in the requested language.
         min_relevance_score: Lowest Tavily relevance score to keep. Defaults to 0.80.
+        output_mode: ``summary`` returns formatted text. ``raw`` returns the
+            filtered Tavily payload as a JSON string. Defaults to summary.
 
     Returns:
-        Search results including an optional short answer and source snippets.
+        Search results as a summary, or the raw JSON payload when
+        ``output_mode`` is ``raw``.
     """
     if not os.getenv("TAVILY_API_KEY"):
         raise RuntimeError(
@@ -139,4 +159,4 @@ def web_search(
         for result in payload.get("results") or []
         if float(result.get("score") or 0) >= min_relevance_score
     ]
-    return _format_search_results(payload)
+    return _format_results(payload, output_mode)
