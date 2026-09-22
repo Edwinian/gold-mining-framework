@@ -16,7 +16,7 @@ from gold_mining_framework.agents.tools.google_trends_filter import (
     google_trends_filter,
 )
 from gold_mining_framework.llm import get_chat_model
-from gold_mining_framework.tools import _format_search_results
+from gold_mining_framework.agents.tools.web_search import _format_search_results
 
 logger = logging.getLogger(__name__)
 
