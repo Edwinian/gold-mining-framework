@@ -1,4 +1,4 @@
-"""ReAct harness for the idea generation agent (LLM ⇄ web_search)."""
+"""ReAct harness for the idea generation agent (LLM ⇄ google_trends_filter)."""
 
 import logging
 
@@ -8,12 +8,14 @@ from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
 from gold_mining_framework.agents.idea_generation_agent.prompt import PROMPT
+from gold_mining_framework.agents.tools.google_trends_filter import (
+    google_trends_filter,
+)
 from gold_mining_framework.llm import get_chat_model
-from gold_mining_framework.tools import web_search
 
 logger = logging.getLogger(__name__)
 
-# Inner ReAct loops may issue many trend-check searches.
+# Inner ReAct loops may check many ideas against Google Trends.
 RECURSION_LIMIT = 80
 
 
@@ -44,12 +46,12 @@ def build_harness() -> CompiledStateGraph:
     """Build the idea generation ReAct graph.
 
     The subgraph is ``agent`` ⇄ ``tools`` until the model stops calling
-    ``web_search``.
+    ``google_trends_filter``.
 
     Returns:
         Compiled LangGraph agent that expects ``messages`` in state.
     """
-    tools = [web_search]
+    tools = [google_trends_filter]
     bound_model = None
 
     def call_model(state: MessagesState) -> dict:
@@ -81,12 +83,16 @@ def _log_progress(update: dict) -> None:
         tool_calls = getattr(message, "tool_calls", None) or []
         if tool_calls:
             for tool_call in tool_calls:
-                query = (tool_call.get("args") or {}).get("query", "")
-                logger.info("web_search: %s", query or tool_call.get("name"))
+                idea = (tool_call.get("args") or {}).get("idea", "")
+                logger.info(
+                    "%s: %s",
+                    tool_call.get("name") or "google_trends_filter",
+                    idea,
+                )
         else:
             logger.info("Writing market hierarchy...")
     if "tools" in update:
-        logger.info("Received search results.")
+        logger.info("Received trend filter result.")
 
 
 def run_harness(query: str, harness: CompiledStateGraph) -> tuple[list, str]:

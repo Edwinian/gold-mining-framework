@@ -43,12 +43,8 @@ def _format_search_results(payload: dict) -> str:
 def web_search(query: str) -> str:
     """Search the web for current information on a topic.
 
-    Use this to gather market context and to check Google Trends for candidate
-    categories, subcategories, niches, and sub-niches (worldwide, since 2004).
-
     Args:
-        query: Search query. Be specific. For trend checks, use forms such as
-            "<keyword> Google Trends worldwide since 2004".
+        query: Search query. Be specific.
 
     Returns:
         Search results including an optional short answer and source snippets.

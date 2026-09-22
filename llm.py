@@ -45,11 +45,15 @@ def _provider_name(model: str) -> str | None:
     return None
 
 
-def get_chat_model(temperature: float = 0.0) -> BaseChatModel:
+def get_chat_model(
+    temperature: float = 0.0,
+    model: str | None = None,
+) -> BaseChatModel:
     """Return the chat model used by pipeline agents.
 
     The current model is xAI Grok (`xai:grok-4.7`). Set `LLM_MODEL` to any
-    `provider:model` id accepted by `init_chat_model`. Documented providers:
+    `provider:model` id accepted by `init_chat_model`. Pass `model` to use a
+    different id for one call. Documented providers:
 
     - `xai` — `XAI_API_KEY` (current default)
     - `anthropic` — Claude, `ANTHROPIC_API_KEY`
@@ -58,11 +62,13 @@ def get_chat_model(temperature: float = 0.0) -> BaseChatModel:
 
     Args:
         temperature: Sampling temperature. Defaults to 0 for deterministic output.
+        model: Optional `provider:model` id. Defaults to `LLM_MODEL` or the
+            current xAI model.
 
     Returns:
         An initialized LangChain chat model.
     """
-    model = _selected_model()
+    model = (model or _selected_model()).strip() or DEFAULT_MODEL
     provider = _provider_name(model)
     api_key_env = _PROVIDER_API_KEYS.get(provider or "")
     if api_key_env and not os.getenv(api_key_env):
