@@ -18,6 +18,8 @@ class AppIdeaState(TypedDict):
         reddit_posts: Raw content of Reddit pages found for the market idea.
         pain_points: Pain-point analysis written from those Reddit posts.
         market_gaps: Solution and market-gap analysis written from those pain points.
+        halt_message: Set when the pipeline stops early, such as when no
+            Reddit posts were found.
     """
 
     query: str
@@ -26,3 +28,4 @@ class AppIdeaState(TypedDict):
     reddit_posts: NotRequired[list[str]]
     pain_points: NotRequired[str]
     market_gaps: NotRequired[str]
+    halt_message: NotRequired[str]

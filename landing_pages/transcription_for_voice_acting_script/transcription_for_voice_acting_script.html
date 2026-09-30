@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BoothCard — Readable before the deadline, not after</title>
+<meta name="description" content="BoothCard turns messy PDFs, emails, and decks into a booth-ready cold read for voice actors. Large type, alts demoted, legal lines marked. First script, no account.">
+<meta name="theme-color" content="#f4f0e8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a1714'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23c4341a'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --ink: #1a1714;
+    --ink-soft: #4a433c;
+    --muted: #6f675e;
+    --paper: #f4f0e8;
+    --paper-2: #ebe4d8;
+    --white: #fffcf8;
+    --line: #ddd4c6;
+    --signal: #c4341a;
+    --signal-deep: #8e2612;
+    --booth: #1a1714;
+    --booth-2: #2a2520;
+    --cream: #f3efe6;
+    --cream-dim: #cfc6b8;
+    --legal: #fff1e4;
+    --shadow: 0 22px 50px rgba(26, 23, 20, 0.14);
+    --sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --wrap: 1120px;
+    --pad: clamp(1.15rem, 3vw, 2rem);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+  }
+  img { max-width: 100%; }
+  h1, h2, h3, p { overflow-wrap: break-word; }
+  h1, h2, h3 {
+    font-family: var(--serif);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    margin: 0;
+  }
+  p { margin: 0; }
+  a { color: var(--signal-deep); text-underline-offset: 0.18em; }
+  a:hover { color: var(--signal); }
+  :focus-visible {
+    outline: 3px solid var(--signal);
+    outline-offset: 3px;
+  }
+  .skip {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    background: var(--ink);
+    color: var(--cream);
+    padding: 0.6rem 0.9rem;
+    z-index: 100;
+  }
+  .skip:focus { top: 0.75rem; }
+  .wrap {
+    width: min(var(--wrap), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--signal-deep);
+    margin-bottom: 0.9rem;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 0 4px rgba(196, 52, 26, 0.15);
+  }
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: rgba(244, 240, 232, 0.94);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(12px);
+  }
+  .header-inner {
+    width: min(var(--wrap), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 4.25rem;
+  }
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--ink);
+    text-decoration: none;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    font-size: 1.05rem;
+  }
+  .logo:hover { color: var(--ink); }
+  .mark {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 0 4px rgba(196, 52, 26, 0.16);
+  }
+  .nav {
+    display: none;
+    gap: 1.25rem;
+    align-items: center;
+  }
+  .nav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  .nav a:hover { color: var(--ink); }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 3.15rem;
+    padding: 0.85rem 1.25rem;
+    border-radius: 999px;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--cream);
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    cursor: pointer;
+  }
+  .btn:hover { background: #000; color: #fff; border-color: #000; }
+  .btn-small { min-height: 2.7rem; padding: 0.55rem 0.95rem; font-size: 0.92rem; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--cream);
+    border-color: rgba(243, 239, 230, 0.45);
+  }
+  .btn-ghost:hover { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+  .hero { padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(3rem, 7vw, 5.5rem); }
+  .hero-grid, .pain-grid, .outcomes, .steps, .product-top {
+    display: grid;
+    gap: 1.5rem;
+  }
+  h1 {
+    font-size: clamp(2.45rem, 6.2vw, 4.55rem);
+    max-width: 11ch;
+    margin-bottom: 1.1rem;
+  }
+  .lede {
+    font-size: clamp(1.08rem, 1.6vw, 1.28rem);
+    color: var(--ink-soft);
+    max-width: 42rem;
+    margin-bottom: 1.35rem;
+  }
+  .benefits {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.6rem;
+    display: grid;
+    gap: 0.7rem;
+  }
+  .benefits li {
+    display: grid;
+    grid-template-columns: 1.35rem 1fr;
+    gap: 0.55rem;
+    align-items: start;
+    max-width: 40rem;
+  }
+  .benefits li::before {
+    content: "";
+    width: 0.72rem;
+    height: 0.72rem;
+    margin-top: 0.42rem;
+    border-radius: 50%;
+    background: var(--signal);
+  }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 0.8rem 1.2rem; align-items: center; }
+  .fine {
+    color: var(--muted);
+    font-size: 0.92rem;
+    max-width: 36rem;
+  }
+  .stage {
+    position: relative;
+    min-height: 28rem;
+    margin-top: 0.5rem;
+  }
+  .source-card, .booth-card {
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+  .source-card {
+    position: absolute;
+    inset: 1.5rem auto auto 0;
+    width: min(78%, 22rem);
+    background: #e7e0d4;
+    color: #8a8176;
+    padding: 0.9rem 1rem;
+    transform: rotate(-6deg);
+    box-shadow: var(--shadow);
+  }
+  .source-card strong, .card-kicker {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.45rem;
+  }
+  .source-card p {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    margin-bottom: 0.35rem;
+  }
+  .smear {
+    height: 0.45rem;
+    border-radius: 99px;
+    background: #cfc6b8;
+    margin: 0.35rem 0;
+  }
+  .smear.short { width: 62%; }
+  .booth-card {
+    position: relative;
+    margin-left: auto;
+    width: min(100%, 26rem);
+    background: var(--white);
+    color: var(--ink);
+    padding: 1.15rem 1.2rem 1.3rem;
+    box-shadow: var(--shadow);
+    transform: rotate(1.5deg);
+  }
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: baseline;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 0.55rem;
+    margin-bottom: 0.85rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .read {
+    font-family: var(--serif);
+    font-size: 1.28rem;
+    line-height: 1.35;
+    margin-bottom: 0.85rem;
+  }
+  .slash { color: var(--signal-deep); font-weight: 700; }
+  .legal {
+    background: var(--legal);
+    border-left: 3px solid var(--signal);
+    padding: 0.7rem 0.75rem;
+    margin-bottom: 0.8rem;
+  }
+  .legal small, .alt small {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--signal-deep);
+    margin-bottom: 0.25rem;
+  }
+  .legal p { font-size: 0.92rem; }
+  .alt { color: var(--muted); font-size: 0.92rem; }
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .band { padding: clamp(3.5rem, 8vw, 6.5rem) 0; }
+  .band-dark {
+    background: var(--booth);
+    color: var(--cream);
+  }
+  .band-dark .eyebrow { color: #f0b2a4; }
+  .band-dark h2, .band-ink h2 { color: var(--cream); }
+  .section-title {
+    font-size: clamp(2rem, 4.5vw, 3.4rem);
+    max-width: 16ch;
+    margin-bottom: 1.5rem;
+  }
+  .pain-grid article, .outcomes article, .steps article, .note, .offer {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.25rem 1.2rem 1.35rem;
+  }
+  .band-dark .pain-grid article {
+    background: var(--booth-2);
+    border-color: rgba(243, 239, 230, 0.08);
+  }
+  .num {
+    font-family: var(--serif);
+    color: var(--signal);
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    display: block;
+    margin-bottom: 0.55rem;
+  }
+  .pain-grid h3, .outcomes h3, .steps h3 {
+    font-size: 1.45rem;
+    margin-bottom: 0.65rem;
+  }
+  .pain-grid p, .outcomes p, .steps p, .belief p { color: inherit; }
+  .band-dark .pain-grid p { color: var(--cream-dim); }
+  .belief {
+    margin-top: 1.5rem;
+    padding: 1.4rem 1.3rem;
+    border-radius: 14px;
+    border: 1px solid rgba(243, 239, 230, 0.14);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .belief h3 {
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    margin-bottom: 0.8rem;
+  }
+  .belief ul {
+    margin: 0.9rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.65rem;
+  }
+  .belief li {
+    padding-left: 1.1rem;
+    position: relative;
+    color: var(--cream-dim);
+  }
+  .belief li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: #f0b2a4;
+  }
+  .closer { margin-top: 1rem; max-width: 48rem; color: var(--cream); }
+  .mid-cta { margin-top: 1.4rem; }
+  .band-light { background: var(--paper-2); }
+  .intro-narrow { max-width: 40rem; margin-bottom: 1.6rem; color: var(--ink-soft); }
+  .outcomes article { background: var(--white); }
+  .outcomes p { color: var(--ink-soft); }
+  .paradigm {
+    margin-top: 1.4rem;
+    padding-top: 1.3rem;
+    border-top: 1px solid var(--line);
+    max-width: 46rem;
+  }
+  .paradigm strong { font-family: var(--serif); font-size: 1.25rem; font-weight: 600; display: block; margin-bottom: 0.4rem; }
+  .product-top { align-items: end; margin-bottom: 1.5rem; }
+  .product-copy { max-width: 40rem; color: var(--ink-soft); }
+  .product-copy h2 { color: var(--ink); font-size: clamp(2.1rem, 4vw, 3.3rem); margin-bottom: 0.7rem; }
+  .steps article { background: transparent; border: none; padding: 0 0.2rem 0 0; }
+  .steps .num { font-size: 1.8rem; letter-spacing: 0; }
+  .founder {
+    margin-top: 2rem;
+    display: grid;
+    gap: 0.8rem;
+    padding: 1.4rem 1.25rem 1.4rem 1.3rem;
+    border-left: 4px solid var(--signal);
+    background: var(--white);
+    border-radius: 0 14px 14px 0;
+  }
+  .founder p { max-width: 46rem; color: var(--ink-soft); }
+  .founder footer { color: var(--ink); font-weight: 700; }
+  .final {
+    background:
+      radial-gradient(ellipse at top left, rgba(196, 52, 26, 0.18), transparent 42%),
+      var(--booth);
+    color: var(--cream);
+    padding: clamp(3.5rem, 8vw, 6.5rem) 0;
+  }
+  .final h2 { font-size: clamp(2.1rem, 5vw, 3.6rem); max-width: 14ch; margin-bottom: 0.8rem; }
+  .final .lede { color: var(--cream-dim); }
+  .urgency {
+    color: #f0b2a4;
+    font-weight: 700;
+    margin: 0.2rem 0 1.2rem;
+  }
+  form { display: grid; gap: 0.75rem; max-width: 36rem; }
+  label { font-size: 0.92rem; font-weight: 700; }
+  input, select, textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--ink);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.85rem 0.9rem;
+    min-height: 3.1rem;
+  }
+  textarea { min-height: 6.5rem; resize: vertical; }
+  .form-row { display: grid; gap: 0.35rem; }
+  .reassure {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-top: 1rem;
+    padding: 0;
+    list-style: none;
+    color: var(--cream-dim);
+    font-size: 0.92rem;
+  }
+  #form-success {
+    max-width: 36rem;
+    background: var(--booth-2);
+    border: 1px solid rgba(243, 239, 230, 0.14);
+    border-radius: 14px;
+    padding: 1.2rem;
+  }
+  #form-success h3 { font-size: 1.7rem; margin-bottom: 0.45rem; }
+  #form-success p { color: var(--cream-dim); margin-bottom: 0.9rem; }
+  .site-footer {
+    padding: 1.4rem 0 2rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+  .site-footer .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    justify-content: space-between;
+  }
+  @media (min-width: 800px) {
+    .nav { display: flex; }
+  }
+  @media (min-width: 900px) {
+    .hero-grid { grid-template-columns: 1.12fr 0.88fr; gap: 3rem; align-items: center; }
+    .pain-grid, .outcomes, .steps { grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .product-top { grid-template-columns: 1.4fr 0.8fr; }
+    .stage { min-height: 32rem; }
+    .source-card { top: 2.2rem; }
+    .booth-card { margin-top: 4.5rem; }
+  }
+  @media (max-width: 899px) {
+    .source-card { position: relative; inset: auto; width: 100%; transform: none; margin-bottom: -1.2rem; }
+    .booth-card { width: 100%; transform: none; }
+    .stage { min-height: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="#top"><span class="mark" aria-hidden="true"></span> BoothCard</a>
+    <nav class="nav" aria-label="Page">
+      <a href="#before">The booth problem</a>
+      <a href="#after">The cold read</a>
+      <a href="#product">How it works</a>
+    </nav>
+    <a class="btn btn-small" href="#get-card">Format my first script</a>
+  </div>
+</header>
+<main id="content">
+  <section class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">Performance scripts for voice actors</p>
+        <h1>Readable before the deadline, not after.</h1>
+        <p class="lede">For voice actors whose sides arrive as messy PDFs, emails, and decks. BoothCard solves the unreadable-in-the-booth problem: one column, large type, alts demoted, legal lines impossible to miss. Generic transcription tools produce words. This is a script you can perform.</p>
+        <ul class="benefits">
+          <li>A high-contrast, large-type, one-column cold read—not a wall of transcript words.</li>
+          <li>Alt takes visually demoted so you don’t perform the wrong line under the clock.</li>
+          <li>Legal and disclaimer copy called out, never buried, never silently rewritten.</li>
+          <li>Pause slashes and speaker labels already on the page when you open the file.</li>
+          <li>Print view and phone prompter from the same card. No account for the first script.</li>
+        </ul>
+        <div class="hero-actions">
+          <a class="btn" href="#get-card">Format my first script</a>
+          <a href="#product">See how a booth card is built</a>
+        </div>
+        <p class="fine" style="margin-top:0.9rem">Commercial clocks, audiobook chapters, dubbing cards, daily auditions. First script free. After that, a few dollars a script—or a small monthly pack if you audition all week.</p>
+      </div>
+      <div class="stage">
+        <p class="sr">Example only: a deck-export source beside a one-column booth card. The hero read is large, the legal line is marked do-not-improvise, and the alt is visually demoted.</p>
+        <div class="source-card" aria-hidden="true">
+          <strong>Source · deck export</strong>
+          <p>SLIDE 4 — CLIENT REVIEW — NOT FOR TALENT</p>
+          <div class="smear"></div>
+          <div class="smear short"></div>
+          <p>Logo lockup. Two columns. Legal in 7-point under the color block. Alt buried in a comment.</p>
+          <div class="smear"></div>
+          <div class="smear short"></div>
+        </div>
+        <article class="booth-card" aria-hidden="true">
+          <div class="card-top"><span>Booth card</span><span>0:30 · hero only</span></div>
+          <p class="card-kicker">Anncr</p>
+          <p class="read">There’s a cleaner way to say your own name. <span class="slash">/</span> Ask for it once, and mean it.</p>
+          <div class="legal">
+            <small>Legal · do not improvise</small>
+            <p>Lumenar is a fictional prescription name in this sample. Talk to your doctor. See the full indication.</p>
+          </div>
+          <p class="alt"><small>Alt · do not read</small> Finally, a name you can say out loud.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-dark" id="before">
+    <div class="wrap">
+      <p class="eyebrow">The before</p>
+      <h2 class="section-title">The script arrives unreadable. The booth does not care.</h2>
+      <div class="pain-grid">
+        <article>
+          <span class="num">01</span>
+          <h3>Messy source, live clock</h3>
+          <p>The sides land as a deck export, a forwarded email, or a PDF built for a client review—not a booth. Tiny type, two columns, a logo lockup, and a legal line buried under the color block. You zoom until the words are readable and the line breaks are gone. Unreadable in the booth is not a script. It is a missed take.</p>
+        </article>
+        <article>
+          <span class="num">02</span>
+          <h3>Words, with the performance stripped out</h3>
+          <p>You run the file through whatever transcription tool you already pay for. You get words. You do not get the pause, the alt, or the disclaimer you are not allowed to paraphrase. Emphasis is gone. The brand is spelled three ways. Nothing tells you how they want it said, and the expensive failure—a mispronounced name on a paid spot—is still sitting in the copy.</p>
+        </article>
+        <article>
+          <span class="num">03</span>
+          <h3>The session is faster than your formatting</h3>
+          <p>Auditions and live-directed sessions move faster than manual formatting. You highlight, you paste, you ask which version is current. Revisions multiply across actor, director, and client. By take four nobody is sure which file is canonical, and you already lost a take to overtime or to legal copy you didn’t see coming.</p>
+        </article>
+      </div>
+      <div class="belief">
+        <h3>Why the usual fixes still cost you a take</h3>
+        <p>You already tried the obvious things. They fail for a boring reason: they were never built to hand you a cold read.</p>
+        <ul>
+          <li>Pasting into a doc makes you the formatter, on the audition clock.</li>
+          <li>Highlighting a PDF does not separate alt takes from the hero read.</li>
+          <li>Generic transcripts drop emphasis, pauses, alt lines, and legal reads. They produce words.</li>
+          <li>Email threads multiply versions. None of them is a revision-safe booth card.</li>
+        </ul>
+        <p class="closer">Horizontal tools already won generic transcription. They were not asked to think in clocks, disclaimers, or a one-page cold read. That fight is not this one.</p>
+      </div>
+      <p class="mid-cta"><a class="btn" href="#get-card">Skip the reformatting</a></p>
+    </div>
+  </section>
+
+  <section class="band band-light" id="after">
+    <div class="wrap">
+      <p class="eyebrow">The after</p>
+      <h2 class="section-title">Picture the file you can perform the moment it opens.</h2>
+      <p class="intro-narrow">Not a cleaner transcript. A script that already knows what the booth needs: what you say, what you skip, what you must not improvise, and which file is the one.</p>
+      <div class="outcomes">
+        <article>
+          <span class="num">The first read</span>
+          <h3>You stop decoding and start performing.</h3>
+          <p>One column. Large type. Speaker labels. Pause slashes where you need air. You are not squinting at a deck on a music stand. You are in the take.</p>
+        </article>
+        <article>
+          <span class="num">The expensive line</span>
+          <h3>Legal copy and alts can’t ambush you.</h3>
+          <p>The disclaimer is called out, not buried under the logo. Alt takes are visually demoted so you cannot perform the wrong one by accident. The words stay the words. Nothing is silently rewritten.</p>
+        </article>
+        <article>
+          <span class="num">The only file</span>
+          <h3>You trust what’s in your hand.</h3>
+          <p>Print it for the stand or drop it on the phone prompter. When a line changes, you are not reconstructing the read from a chat scroll and three PDFs. One canonical card.</p>
+        </article>
+      </div>
+      <div class="paradigm">
+        <strong>The better way is a booth card, not a smarter transcript.</strong>
+        <p>The missing layer sits between the raw script or audio file and a booth-ready performance document: cold-readable, versioned, and honest about pronunciation until a human and the client lock it. That is the new unit of work. Narrow on purpose. It does not direct you. It does not act for you. It makes the copy performable before the deadline, not after.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="product">
+    <div class="wrap">
+      <div class="product-top">
+        <div class="product-copy">
+          <p class="eyebrow">The bridge</p>
+          <h2>BoothCard</h2>
+          <p>Stripped cold-read formatting for working voice actors. One upload, one job: a high-contrast script you can perform under deadline. No AI acting notes mixed into the copy. No account required for the first script. When a name or a legal line cannot be guessed, an approved read waits for the client to check it before anything ships.</p>
+        </div>
+        <p class="fine">Clean files come back fast. Ugly files get a human pass. A wrong legal line costs more than a few extra minutes.</p>
+      </div>
+      <div class="steps">
+        <article>
+          <span class="num">1</span>
+          <h3>Send the mess</h3>
+          <p>PDF, email, doc, or deck. If it is unreadable in a booth, that is the point. No account for the first script.</p>
+        </article>
+        <article>
+          <span class="num">2</span>
+          <h3>We build the booth card</h3>
+          <p>Hero read in one column. Alts demoted. Speakers labeled. Legal lines flagged do-not-improvise. Pause slashes go where the copy needs air—not where a model guessed you should feel something. Your words are never quietly rewritten.</p>
+        </article>
+        <article>
+          <span class="num">3</span>
+          <h3>You perform the copy</h3>
+          <p>Open the print view or the phone prompter and read. A revision comes back as a new card, not another mystery attachment in the thread.</p>
+        </article>
+      </div>
+      <aside class="founder">
+        <p>I am not building another transcription app. That category is already decided, and it still hands actors a document they cannot cold-read. What was missing is performance script prep: type big enough for a phone on a stand, alts impossible to confuse with the hero, legal copy visible and untouched. BoothCard is that layer. When the file is too ugly to trust, a person checks it. If you narrate a series or the brand has to sign off on names, the same job can carry an approved lexicon—so chapter 40, and the next actor on the roster, are not guessing. Start with the read you need today.</p>
+        <footer>— Founder, BoothCard</footer>
+      </aside>
+    </div>
+  </section>
+
+  <section class="final" id="get-card">
+    <div class="wrap">
+      <p class="eyebrow">Before you step in</p>
+      <h2>Don’t take the next audition from a deck export.</h2>
+      <p class="lede">Format the script you already have. First one needs no account. We’ll send a private upload link—booth card, or an approved read if the client has to lock names and legal lines.</p>
+      <p class="urgency">The booth will not wait while you reformat. The deadline is already on the sides.</p>
+      <div id="form-panel">
+        <form id="prep-form" action="#get-card" method="post">
+          <div class="form-row">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@studio.com">
+          </div>
+          <div class="form-row">
+            <label for="need">What do you need?</label>
+            <select id="need" name="need" required>
+              <option value="booth">Booth card — first script free</option>
+              <option value="approved">Approved read — client signs off on names and legal lines</option>
+              <option value="series">Series continuity — character and pronunciation bible</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="note">The job, in a line <span style="font-weight:500;color:var(--cream-dim)">(optional)</span></label>
+            <textarea id="note" name="note" placeholder="0:30 pharma spot, audition in two hours. Or: chapter 12, three recurring names."></textarea>
+          </div>
+          <button class="btn" type="submit">Send me the upload link</button>
+        </form>
+        <ul class="reassure">
+          <li>Legal copy stays untouched</li>
+          <li>Alts never look like the hero</li>
+          <li>No acting notes disguised as the script</li>
+        </ul>
+      </div>
+      <div id="form-success" hidden tabindex="-1">
+        <h3>You’re in.</h3>
+        <p>We’ll send the upload link for <strong id="success-need">your booth card</strong> to <strong id="success-email">your email</strong>. This page stores nothing by itself—connect the form to your endpoint before you send real traffic.</p>
+        <button class="btn btn-ghost" type="button" id="reset-form">Use a different email</button>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <span>BoothCard · performable, approved, versioned scripts</span>
+    <span>Not a director. Not a caption compliance claim. Not generic transcription.</span>
+  </div>
+</footer>
+<script>
+(function () {
+  var form = document.getElementById("prep-form");
+  var panel = document.getElementById("form-panel");
+  var success = document.getElementById("form-success");
+  var reset = document.getElementById("reset-form");
+  if (!form) return;
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    var need = form.elements.need;
+    document.getElementById("success-email").textContent = form.elements.email.value;
+    document.getElementById("success-need").textContent = need.options[need.selectedIndex].text;
+    panel.hidden = true;
+    success.hidden = false;
+    success.focus();
+  });
+  reset.addEventListener("click", function () {
+    success.hidden = true;
+    panel.hidden = false;
+    form.elements.email.focus();
+  });
+})();
+</script>
+</body>
+</html>

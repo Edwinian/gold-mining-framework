@@ -40,6 +40,10 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     logging.info("Finding market gaps for: %s", idea)
     result = graph.invoke({"query": idea})
+    halt_message = (result.get("halt_message") or "").strip()
+    if halt_message:
+        print(halt_message)  # noqa: T201
+        return
     print(result.get("market_gaps") or "")  # noqa: T201
 
 
