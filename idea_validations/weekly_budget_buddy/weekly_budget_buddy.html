@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Same Books — several accounts, every device, until next pay</title>
+<meta name="description" content="Simple multi-account tracking on every device. Budget until next pay, especially if you are paid monthly. Offline. Lifetime is two years of annual.">
+<meta name="theme-color" content="#faf7f2">
+<style>
+  :root {
+    --ink: #1c1917;
+    --ink-soft: #44403c;
+    --muted: #5c564e;
+    --paper: #faf7f2;
+    --paper-2: #f3eee6;
+    --card: #fffcf8;
+    --line: #e4dcd0;
+    --accent: #0c4a36;
+    --accent-ink: #ffffff;
+    --accent-soft: #e5f2ec;
+    --clay: #6f2c22;
+    --clay-soft: #f8ebe6;
+    --gold: #8a5a12;
+    --gold-soft: #f8f1e4;
+    --shadow: 0 18px 50px rgba(28, 25, 23, 0.08);
+    --radius: 18px;
+    --max: 1120px;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #f6f1ea;
+      --ink-soft: #ddd4c8;
+      --muted: #c4b8aa;
+      --paper: #141210;
+      --paper-2: #1c1916;
+      --card: #221f1b;
+      --line: #3a342c;
+      --accent: #8fd9b8;
+      --accent-ink: #06281c;
+      --accent-soft: #16352b;
+      --clay: #f0b2a6;
+      --clay-soft: #3a2420;
+      --gold: #e6c48a;
+      --gold-soft: #3a3020;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--ink);
+    background: var(--paper);
+  }
+  img { max-width: 100%; }
+  a { color: var(--accent); }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus { outline: none; }
+  :focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .skip {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: 0.6rem 1rem;
+    z-index: 20;
+    border-radius: 8px;
+  }
+  .skip:focus { top: 0.75rem; }
+  .wrap {
+    width: min(var(--max), calc(100% - 2rem));
+    margin-inline: auto;
+  }
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 4.25rem;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--ink);
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .mark {
+    width: 1.7rem;
+    height: 2rem;
+    border: 2px solid var(--ink);
+    border-radius: 3px 8px 3px 3px;
+    position: relative;
+    flex: none;
+  }
+  .mark::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    top: 7px;
+    height: 2px;
+    background: var(--accent);
+    box-shadow: 0 5px 0 var(--ink), 0 10px 0 var(--line);
+  }
+  nav ul {
+    display: flex;
+    gap: 1.1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+  }
+  nav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  nav a:hover { text-decoration: underline; }
+  .nav-links { display: none; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 48px;
+    padding: 0.75rem 1.15rem;
+    border-radius: 999px;
+    border: 2px solid var(--accent);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    line-height: 1.2;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--accent);
+  }
+  .hero { padding: 2.5rem 0 4rem; }
+  .hero-grid { display: grid; gap: 2.5rem; align-items: center; }
+  .kicker {
+    margin: 0 0 0.8rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+  }
+  h1, h2, h3, .amount, .step-num {
+    font-family: var(--serif);
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+  }
+  h1 {
+    margin: 0 0 1rem;
+    font-size: clamp(2.35rem, 7vw, 4.4rem);
+    font-weight: 560;
+    max-width: 12ch;
+  }
+  .sub {
+    margin: 0 0 1.4rem;
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    max-width: 42rem;
+  }
+  .benefits {
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+    max-width: 40rem;
+  }
+  .benefits li {
+    position: relative;
+    padding: 0.45rem 0 0.45rem 1.7rem;
+  }
+  .benefits li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.85rem;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: inset 0 0 0 2px var(--paper), inset 0 0 0 4px var(--accent);
+  }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+  .fine {
+    margin: 0.85rem 0 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    max-width: 38rem;
+  }
+  .sheet {
+    margin: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 22px 22px 16px 16px;
+    box-shadow: var(--shadow);
+    padding: 1.25rem 1.25rem 1.1rem;
+    position: relative;
+  }
+  .sheet::before {
+    content: "FILE";
+    position: absolute;
+    top: -1px;
+    right: 1.4rem;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    padding: 0.35rem 0.55rem 0.45rem;
+    border-radius: 0 0 8px 8px;
+  }
+  .sheet-kicker, .sheet-label, .sheet-span, .sheet-file {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .amount {
+    margin: 0.2rem 0 0.35rem;
+    font-size: clamp(3rem, 8vw, 4.2rem);
+    color: var(--accent);
+  }
+  .accounts {
+    list-style: none;
+    margin: 1rem 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .accounts li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+  .sheet-file {
+    background: var(--paper-2);
+    border-radius: 999px;
+    display: inline-block;
+    padding: 0.35rem 0.7rem;
+  }
+  section { padding: 4.5rem 0; }
+  .section-title {
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    margin: 0 0 0.8rem;
+    max-width: 18ch;
+  }
+  .lede {
+    margin: 0 0 2rem;
+    max-width: 42rem;
+    color: var(--ink-soft);
+    font-size: 1.15rem;
+  }
+  #before { background: var(--paper-2); }
+  .pains { display: grid; gap: 1rem; }
+  .pain {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 6px solid var(--clay);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.25rem 0.4rem;
+  }
+  .pain h3 { margin: 0 0 0.4rem; font-size: 1.45rem; }
+  .pain p { margin-top: 0; }
+  .belief {
+    margin-top: 1.5rem;
+    padding: 1.4rem 1.3rem;
+    background: var(--clay-soft);
+    border-radius: var(--radius);
+  }
+  .belief h3 { margin: 0 0 0.5rem; font-family: var(--serif); font-size: 1.6rem; }
+  .quotes {
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.75rem;
+  }
+  blockquote {
+    margin: 0;
+    padding: 0.9rem 1rem;
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+  blockquote p { margin: 0; font-family: var(--serif); font-size: 1.2rem; line-height: 1.35; }
+  blockquote footer { margin-top: 0.4rem; color: var(--muted); font-size: 0.85rem; font-family: var(--sans); }
+  .outcomes { display: grid; gap: 1rem; }
+  .outcome {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.3rem;
+    box-shadow: var(--shadow);
+  }
+  .outcome h3 { margin: 0 0 0.45rem; font-size: 1.5rem; }
+  .outcome p { margin: 0; color: var(--ink-soft); }
+  .paradigm {
+    margin-top: 1.5rem;
+    padding: 1.4rem;
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+  }
+  .paradigm h3 { margin: 0 0 0.4rem; font-family: var(--serif); font-size: 1.7rem; }
+  .steps { display: grid; gap: 1rem; margin: 1.5rem 0 2rem; }
+  .step {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+  }
+  .step-num {
+    display: block;
+    color: var(--accent);
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+  }
+  .step h3 { margin: 0 0 0.4rem; font-size: 1.3rem; }
+  .step p { margin: 0; color: var(--ink-soft); }
+  .prices { display: grid; gap: 1rem; margin: 1rem 0 1.25rem; }
+  .price {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+  }
+  .price.featured {
+    border-color: var(--accent);
+    box-shadow: var(--shadow);
+    background: var(--gold-soft);
+  }
+  .price .tag {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .price .cost {
+    font-family: var(--serif);
+    font-size: 2.6rem;
+    margin: 0.2rem 0;
+    letter-spacing: -0.03em;
+  }
+  .price ul { margin: 0.4rem 0 0; padding-left: 1.1rem; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 12px;
+    overflow: hidden;
+    font-variant-numeric: tabular-nums;
+  }
+  caption {
+    text-align: left;
+    font-weight: 700;
+    margin-bottom: 0.55rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.7rem 0.8rem;
+    border-bottom: 1px solid var(--line);
+  }
+  th { background: var(--paper-2); }
+  .note, .honest {
+    background: var(--card);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    margin-top: 1rem;
+  }
+  .honest strong { color: var(--clay); }
+  .founder {
+    margin-top: 2rem;
+    padding: 1.4rem;
+    background: var(--paper-2);
+    border-radius: var(--radius);
+  }
+  .founder h3 { margin: 0 0 0.5rem; font-family: var(--serif); font-size: 1.6rem; }
+  #start { background: var(--ink); color: var(--paper); }
+  #start .section-title, #start h3 { color: var(--paper); }
+  #start .lede, #start p { color: color-mix(in srgb, var(--paper) 88%, var(--ink)); }
+  @media (prefers-color-scheme: dark) {
+    #start { background: #0d1f19; color: var(--ink); }
+    #start .section-title, #start h3 { color: var(--ink); }
+  }
+  form {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1.2rem;
+    background: var(--card);
+    color: var(--ink);
+    padding: 1.2rem;
+    border-radius: var(--radius);
+  }
+  fieldset {
+    margin: 0;
+    padding: 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  legend { font-weight: 700; padding: 0 0.3rem; }
+  label { display: block; font-weight: 650; margin-bottom: 0.3rem; }
+  .choice {
+    font-weight: 500;
+    display: flex;
+    gap: 0.55rem;
+    align-items: flex-start;
+    margin: 0.4rem 0;
+  }
+  input[type="date"] {
+    width: 100%;
+    max-width: 16rem;
+    min-height: 48px;
+    padding: 0.4rem 0.6rem;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .error {
+    margin: 0;
+    color: var(--clay);
+    font-weight: 700;
+  }
+  #plan {
+    margin-top: 1rem;
+    background: var(--accent-soft);
+    color: var(--ink);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+  }
+  #plan h3 { margin-top: 0; }
+  .mailto {
+    font-weight: 800;
+  }
+  footer {
+    padding: 2rem 0 3rem;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+  footer p { max-width: 48rem; }
+  @media (min-width: 760px) {
+    .nav-links { display: flex; }
+    .pains, .outcomes { grid-template-columns: 1fr; }
+    .steps, .outcomes { grid-template-columns: repeat(3, 1fr); }
+    .prices { grid-template-columns: 1fr 1fr; }
+    .quotes { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 960px) {
+    .hero { padding: 4rem 0 5rem; }
+    .hero-grid { grid-template-columns: 1.15fr 0.85fr; gap: 3.5rem; }
+    .pains { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="logo" href="#top"><span class="mark" aria-hidden="true"></span> Same Books</a>
+    <nav aria-label="Page">
+      <ul>
+        <li class="nav-links"><a href="#before">The gap</a></li>
+        <li class="nav-links"><a href="#after">Until next pay</a></li>
+        <li class="nav-links"><a href="#offer">The offer</a></li>
+        <li><a class="btn" href="#start">Build my pay period</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <section class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="kicker">Cross-platform · Paid monthly · Offline</p>
+        <h1>Several accounts. Very simple. Every device.</h1>
+        <p class="sub">Same Books is for people who want to keep track of their money on several accounts — on the phone and the computer — without a new budgeting philosophy. The period is the gap until your next paycheck, especially if you get paid monthly. Fully offline. No bank login. Lifetime is about the cost of two years of annual, and the math is on this page.</p>
+        <ul class="benefits">
+          <li>Leave a platform, not a system you already love: several accounts, transfers, one short list.</li>
+          <li>See what is left until next pay. Weekly, biweekly, and monthly are equal — a week is not the front door.</li>
+          <li>Start fully offline on one device. No account wall. No bank password.</li>
+          <li>Buy continuity once if you want the same file on a second device. Break-even is month 24.</li>
+          <li>If we disappear, the books do not. Reading and exporting stay free.</li>
+        </ul>
+        <div class="hero-actions">
+          <a class="btn" href="#start">Build my pay period</a>
+          <a class="btn btn-ghost" href="#offer">See the two-year math</a>
+        </div>
+        <p class="fine">No card for the first device. Core logging is never gated. No fake countdown — your next deposit is the only clock that matters.</p>
+      </div>
+      <figure class="sheet">
+        <figcaption class="sheet-kicker">Example home screen · not your numbers</figcaption>
+        <p class="sheet-label">Left until next pay</p>
+        <p class="amount">$842</p>
+        <p class="sheet-span">Mar 1 – Mar 31 · someone who gets paid monthly</p>
+        <ul class="accounts">
+          <li><span>Checking</span><span>$1,204</span></li>
+          <li><span>Savings</span><span>$3,100</span></li>
+          <li><span>Cash</span><span>$86</span></li>
+        </ul>
+        <p class="sheet-file">same-books.file · offline · no bank login</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="before" aria-labelledby="before-title">
+    <div class="wrap">
+      <p class="kicker">Before</p>
+      <h2 class="section-title" id="before-title">The app you love is on the wrong device. The week is the wrong period.</h2>
+      <p class="lede">These are the asks, in the words people actually used. Not a story about shame, debt spirals, or five failed apps. Those pains are familiar. They are not what was said.</p>
+      <div class="pains">
+        <article class="pain">
+          <h3>You already have a system. It does not travel.</h3>
+          <p>It is very simple. You can just keep track of your money on several accounts, and you have loved that for over a year. You are not shopping for a score, a category tree, or a bank connection. The request is narrower and sharper: any good cross-platform version of the tracker you already use. A mediocre port with more features is how that love dies.</p>
+        </article>
+        <article class="pain">
+          <h3>You get paid monthly. The app still thinks in weeks.</h3>
+          <p>A weekly default is the wrong front door when the deposit lands once a month. Setup for weekly, biweekly, and monthly budgets is not the same as a span from this paycheck to the next. Bills sit on dates inside that gap. What you can spend is what is left until the next deposit. You should not have to translate a seven-day app into a thirty-day life.</p>
+        </article>
+        <article class="pain">
+          <h3>The price, and the server, make you do detective work.</h3>
+          <p>Someone has to ask whether a lifetime option even exists. The answer, when it comes, is about the cost of two years of the annual subscription — and you had to reverse-engineer it. Elsewhere the banner says 100% free and fully offline. Neither tells you whether logging an expense gets rented later, or whether the books only exist if their server does.</p>
+        </article>
+      </div>
+      <div class="belief">
+        <h3>Why the last fix did not stick</h3>
+        <p>Formal finance training did not hand over a personal system. “I studied finance but never learned how to manage my own…” is a skill gap, not a character flaw. Another course will not close it. Neither will a notification renamed buddy. One person said it plainly: “I’m hoping to make a new friend who wants to talk financials and budgets with me.” That is a person. An app check-in is adjacent. It is not the request.</p>
+        <p>What failed was the fit. The simple book lived on one platform. The period ignored the paycheck. The price hid the break-even. The cloud was treated as the product. You did not fail at budgeting. The tools failed the job you described.</p>
+      </div>
+      <ul class="quotes">
+        <li>
+          <blockquote>
+            <p>“Any good cross-platform budgeting app like Buddy?”</p>
+            <footer>Public ask · not a review of Same Books</footer>
+          </blockquote>
+        </li>
+        <li>
+          <blockquote>
+            <p>“It’s very simple, I can just keep track of my money on several accounts.”</p>
+            <footer>What people want to keep</footer>
+          </blockquote>
+        </li>
+        <li>
+          <blockquote>
+            <p>“Very useful to you as someone who gets paid monthly.”</p>
+            <footer>The only concrete pay scenario in the asks</footer>
+          </blockquote>
+        </li>
+        <li>
+          <blockquote>
+            <p>“Does it have a lifetime subscription?” “About the cost of two years of the annual.”</p>
+            <footer>The only pricing conversation</footer>
+          </blockquote>
+        </li>
+      </ul>
+      <p class="fine">Same Books is not affiliated with Buddy, Buddy Budgeting AB, or any educator people were pointed toward. We do not reprint their materials. Pay-date planning here is our own blank structure: a start, an end, an expected inflow, bills on dates, and what is left.</p>
+    </div>
+  </section>
+
+  <section id="after" aria-labelledby="after-title">
+    <div class="wrap">
+      <p class="kicker">After</p>
+      <h2 class="section-title" id="after-title">Imagine the same books on the other device — and the number on screen is what’s left until next pay.</h2>
+      <p class="lede">Not a smarter identity. The life you were already trying to have: simple tracking, a period that matches the deposit, a price you can check before you care.</p>
+      <div class="outcomes">
+        <article class="outcome">
+          <h3>Same books everywhere</h3>
+          <p>You leave a platform, not a system. Phone and computer show the same accounts, the same transfers, the same short list. No relearning. No “sign in and we’ll rebuild you.”</p>
+        </article>
+        <article class="outcome">
+          <h3>The paycheck is the calendar</h3>
+          <p>If you get paid monthly, that path is native. The span starts on pay date. A weekly look is a bookmark inside the span, not a reset. You always know what is left until the next deposit.</p>
+        </article>
+        <article class="outcome">
+          <h3>The math, and the file, are yours</h3>
+          <p>Annual and lifetime sit on one page. Lifetime is two years of annual. If you stay past that, buying once is the rational move — and you can see it before you pay. Export stays free.</p>
+        </article>
+      </div>
+      <div class="paradigm">
+        <h3>The better way: the budget is a file</h3>
+        <p>Stop competing with a weekly brand. The home screen is the gap between deposits. The app is an editor for a file you can copy to a new phone, a laptop, or a backup disk. Sync, if you ever want it, is continuity of that file — not a tenant account. A person, if you want one to talk financials and budgets with, gets a one-page brief. Not your bank password.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="product" aria-labelledby="product-title">
+    <div class="wrap">
+      <p class="kicker">The book</p>
+      <h2 class="section-title" id="product-title">Same Books</h2>
+      <p class="lede">A simple multi-account ledger. The same file on every platform we ship. Pay date is a first-class period. Offline by default. You pay for a second device, not for the right to write down an expense.</p>
+      <div class="steps">
+        <article class="step">
+          <span class="step-num">1</span>
+          <h3>Name the accounts and the next pay date</h3>
+          <p>Checking, savings, cash — the several accounts you already track. The next deposit is a required field. Weekly, biweekly, monthly, or a date you set yourself. None of them is a workaround.</p>
+        </article>
+        <article class="step">
+          <span class="step-num">2</span>
+          <h3>Log spending and transfers, offline</h3>
+          <p>A transfer between your accounts is one action, not two expenses. No bank login. No rules engine. No tutorial. If a screen needs a course, it does not ship. It works with no connection.</p>
+        </article>
+        <article class="step">
+          <span class="step-num">3</span>
+          <h3>Read what’s left until next pay</h3>
+          <p>That is the home number. A short check-in can sit inside the longer period. It does not reset it. When you want the same file on another device, unlock continuity. Until then, one device is complete.</p>
+        </article>
+      </div>
+
+      <div id="offer">
+        <h3 class="section-title" style="font-size:clamp(1.6rem,3vw,2.2rem)">The offer, with the break-even shown</h3>
+        <p>People already heard that lifetime is about two years of annual. Here that is not a rumor. One device is free either way. The prices below are only for continuity — the same file on a second device.</p>
+        <div class="prices">
+          <article class="price">
+            <p class="tag">One device</p>
+            <p class="cost">$0</p>
+            <p>Finished. Not a demo.</p>
+            <ul>
+              <li>Several accounts, transfers, period total</li>
+              <li>Fully offline, no account to create</li>
+              <li>Export a spreadsheet can open</li>
+            </ul>
+          </article>
+          <article class="price featured">
+            <p class="tag">Continuity · lifetime = 2 × annual</p>
+            <p class="cost">$72</p>
+            <p>Or $36 a year, on the same page, so you can compare. Break-even is month 24.</p>
+            <ul>
+              <li>The same file on a second device</li>
+              <li>Updates we actually ship</li>
+              <li>Logging still works if you never pay</li>
+            </ul>
+          </article>
+        </div>
+        <table>
+          <caption>When buying once costs less than renewing</caption>
+          <thead>
+            <tr>
+              <th scope="col">If you keep continuity</th>
+              <th scope="col">Annual path</th>
+              <th scope="col">Lifetime</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1 year</td>
+              <td>$36</td>
+              <td>$72</td>
+            </tr>
+            <tr>
+              <td>2 years</td>
+              <td>$72</td>
+              <td>$72</td>
+            </tr>
+            <tr>
+              <td>3 years</td>
+              <td>$108</td>
+              <td>$72</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note">If you might stop inside two years, stay annual or stay free on one device. If you plan to use it, lifetime is the rational move. We will not hide a feature just to create pain, and we will not run a fake countdown.</p>
+        <p class="note">Lifetime is not a promise that a company never ends. The file is that promise. Reading and exporting stay free so your history is never a hostage. A private tally can show how often you log. There is no streak to break and no shame banner.</p>
+      </div>
+
+      <aside class="honest">
+        <p><strong>Do not switch if</strong> your current app is already on every device you use, and the period already matches how you are paid. Stay. Same Books is for the gap: simple multi-account tracking that is stuck on one platform, or a weekly default that does not fit a monthly paycheck.</p>
+      </aside>
+
+      <aside class="founder">
+        <h3>A note from the person building this</h3>
+        <p>I am not going to pretend a notification is the friend you hoped for. The emotional line in public was specific: someone to talk financials and budgets with. Same Books will not match you with strangers and call that a buddy. The word is already taken — by an app people love, and by a person.</p>
+        <p>What I am building is the book those asks actually described. Very simple. Several accounts. The same file on every device you use. Timed to the paycheck, especially if you are paid monthly. Fully offline. Lifetime priced at two years of annual so you never have to reverse-engineer a comment thread.</p>
+        <p>If you studied the subject and still do not run your own money, this is a short close you can repeat — reconcile, confirm what you logged, read what’s left — not another course. If you want a human in the room, the brief is one page: what came in, what’s left until next pay, what you did not log, one decision. You own the notes. We never take the bank password. The decision stays yours.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-title">
+    <div class="wrap">
+      <p class="kicker">Start</p>
+      <h2 class="section-title" id="start-title">Put the next deposit on the home screen before it lands.</h2>
+      <p class="lede">That is the only urgency worth your time. One device is free and complete tonight. A second device is a decision you can price in a minute. No account. No card. This page does not send your details anywhere — it builds the period from what you type, in the browser.</p>
+      <form id="pay-form" action="#plan" novalidate>
+        <div>
+          <label for="paydate">Next pay date</label>
+          <input id="paydate" name="paydate" type="date" required autocomplete="off">
+        </div>
+        <fieldset>
+          <legend>How you get paid</legend>
+          <label class="choice"><input type="radio" name="cadence" value="monthly" checked> Paid monthly — make this the native path</label>
+          <label class="choice"><input type="radio" name="cadence" value="biweekly"> Every two weeks</label>
+          <label class="choice"><input type="radio" name="cadence" value="weekly"> Weekly</label>
+          <label class="choice"><input type="radio" name="cadence" value="irregular"> Irregular — I will set the next deposit myself</label>
+        </fieldset>
+        <label class="choice"><input type="checkbox" name="second" value="yes"> I want the same file on a second device</label>
+        <p id="form-error" class="error" hidden></p>
+        <button class="btn" type="submit">Build my pay period</button>
+      </form>
+      <div id="plan" tabindex="-1" hidden></div>
+      <noscript>
+        <p>JavaScript is off, so the planner cannot run. The offer still stands: paid monthly means pay date to next pay date, not four forced weeks. One device is $0, offline, with export. Continuity is $36 a year or $72 once. Break-even is month 24.</p>
+      </noscript>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="wrap">
+    <p>Same Books is an independent file editor for personal accounts. Not a bank. Not financial advice. Not affiliated with other budgeting apps or educators mentioned in public asks. We do not reprint their methods, names as our own, or worksheets.</p>
+    <p>Free on one device. Continuity: $36/year or $72 once. Export stays free. Your books are a file you keep.</p>
+  </div>
+</footer>
+<script>
+(function () {
+  var form = document.getElementById("pay-form");
+  var err = document.getElementById("form-error");
+  var out = document.getElementById("plan");
+  if (!form || !out) return;
+
+  function moneyPath(second) {
+    if (second) {
+      return "You want the same file on a second device. Continuity is $36 a year or $72 once. Break-even is month 24. If you will still be tracking after two years, lifetime is the rational move. If you might stop sooner, stay on annual.";
+    }
+    return "One device stays free and complete: several accounts, transfers, offline, export. Pay only when you want the same book in a second place. Logging is never the thing we charge for.";
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var data = new FormData(form);
+    var dateStr = String(data.get("paydate") || "");
+    var cadence = String(data.get("cadence") || "monthly");
+    var second = data.get("second") === "yes";
+    if (!dateStr) {
+      err.hidden = false;
+      err.textContent = "Add your next pay date. The period needs a start.";
+      document.getElementById("paydate").focus();
+      return;
+    }
+    var start = new Date(dateStr + "T00:00:00");
+    if (isNaN(start.getTime())) {
+      err.hidden = false;
+      err.textContent = "That date did not read. Try again.";
+      return;
+    }
+    err.hidden = true;
+    var end = new Date(start.getTime());
+    var label = "monthly";
+    if (cadence === "weekly") {
+      end.setDate(end.getDate() + 7);
+      label = "weekly";
+    } else if (cadence === "biweekly") {
+      end.setDate(end.getDate() + 14);
+      label = "biweekly";
+    } else if (cadence === "irregular") {
+      label = "irregular";
+    } else {
+      end.setMonth(end.getMonth() + 1);
+      label = "monthly";
+    }
+    var fmt = new Intl.DateTimeFormat(undefined, { month: "long", day: "numeric", year: "numeric" });
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var days = Math.round((start.getTime() - today.getTime()) / 86400000);
+    var when;
+    if (days > 1) when = days + " days until that deposit. The period starts then — not next Monday, unless Monday is payday.";
+    else if (days === 1) when = "That deposit is tomorrow. Put the date on the home screen tonight.";
+    else if (days === 0) when = "That deposit is today. What is left after it lands is the only number that matters.";
+    else when = "That pay date has already passed. Use your next real deposit, not a week you already lived.";
+
+    var span;
+    if (cadence === "irregular") {
+      span = "You set the next deposit yourself, starting " + fmt.format(start) + ". We will not invent a weekly ending for irregular pay.";
+    } else if (cadence === "weekly") {
+      span = "Your period is seven days, " + fmt.format(start) + " to " + fmt.format(end) + ". Weekly is welcome here. It is native. It is just not the only story, and it does not rename a month into four weeks.";
+    } else {
+      span = "This span runs from " + fmt.format(start) + " to " + fmt.format(end) + ". A " + label + " paycheck is native — not a guest setting inside a weekly app.";
+    }
+
+    var text = span + " " + when + " " + moneyPath(second) + " Home number: what is left until next pay. A check-in can sit inside this span. It does not reset it.";
+    out.hidden = false;
+    out.innerHTML = "";
+    var h = document.createElement("h3");
+    h.textContent = "Your period";
+    var p1 = document.createElement("p");
+    p1.textContent = span;
+    var p2 = document.createElement("p");
+    p2.textContent = when;
+    var p3 = document.createElement("p");
+    p3.textContent = moneyPath(second);
+    var p4 = document.createElement("p");
+    p4.textContent = "Home number: what is left until next pay. Log on one device, offline, with no bank login. A weekly check-in can sit inside this span. It does not reset it.";
+    var mail = document.createElement("a");
+    mail.className = "mailto";
+    mail.href = "mailto:?subject=" + encodeURIComponent("My Same Books period") + "&body=" + encodeURIComponent(text + "\n\nOne device: $0. Continuity: $36/year or $72 once. Break-even month 24.");
+    mail.textContent = "Email this plan to yourself";
+    out.appendChild(h);
+    out.appendChild(p1);
+    out.appendChild(p2);
+    out.appendChild(p3);
+    out.appendChild(p4);
+    out.appendChild(mail);
+    out.focus();
+  });
+})();
+</script>
+</body>
+</html>

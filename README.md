@@ -1,8 +1,8 @@
 # Gold Mining Framework
 
-Linear LangGraph pipeline of specialist agents. The current graph is `START -> reddit_query_agent -> pain_point_agent -> market_gap_agent -> landing_page_agent -> END`.
+Linear LangGraph pipeline of specialist agents. The current graph is `START -> reddit_query_agent -> pain_point_agent -> market_gap_agent -> save_idea_validation -> END`.
 
-The Reddit query agent searches Reddit for the market idea and stores each result's raw page content. The pain point agent reads those posts and writes a pain-point analysis. The market gap agent reads that analysis and writes solution opportunities. The landing page agent writes those analyses and an HTML page under `landing_pages`. The idea generation agent and the idea picker agent run on their own. Both take an optional `--topic`: `health`, `wealth`, and `relationships` are markets, and any other value is a category. Omit `--topic` for random ideas starting from the market level. Idea generation keeps leaves whose Google Trends (worldwide, since 2004) slope smoothly upward.
+The Reddit query agent searches Reddit for the market idea and stores each result's raw page content. The pain point agent reads those posts and writes a pain-point analysis. The market gap agent reads that analysis and writes solution opportunities. Those two analyses are saved under `idea_validations`. The idea generation agent and the idea picker agent run on their own. Both take an optional `--topic`: `health`, `wealth`, and `relationships` are markets, and any other value is a category. Omit `--topic` for random ideas starting from the market level. Idea generation keeps leaves whose Google Trends (worldwide, since 2004) slope smoothly upward.
 
 Agents currently call **xAI Grok 4.7** (`xai:grok-4.7`).
 
@@ -50,16 +50,15 @@ python -m gold_mining_framework --idea=coparenting
 python -m gold_mining_framework --idea "alternative medicine"
 ```
 
-## Landing Pages
+## Idea validations
 
-The graph ends at `landing_page_agent`. That agent reads the market idea, the pain-point analysis, and the market-gap analysis, then writes a folder under `landing_pages`. The folder name is the idea in snake case.
+The graph ends by saving the pain-point analysis and the market-gap analysis. The folder name is the idea in snake case.
 
 For `python -m gold_mining_framework --idea=coparenting`, the files are:
 
 ```text
-landing_pages/coparenting/pain_points.md
-landing_pages/coparenting/market_gaps.md
-landing_pages/coparenting/coparenting.html
+idea_validations/coparenting/pain_points.md
+idea_validations/coparenting/market_gaps.md
 ```
 
-`pain_points.md` and `market_gaps.md` are the analyses from the previous agents. `coparenting.html` is a self-contained landing page generated from those analyses. Open that HTML file in a browser. The command itself prints the market-gap analysis to the terminal.
+The command itself prints the market-gap analysis to the terminal.
