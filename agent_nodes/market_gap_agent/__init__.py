@@ -1,7 +1,8 @@
 """Market gap node for the linear gold mining graph.
 
-Reads the pain-point analysis and writes market-gap solutions.
-This node is invoked by the graph, not as its own command.
+Reads the pain-point analysis and writes an idea-validation analysis.
+It does not cover pricing or monetization. This node is invoked by the
+graph, not as its own command.
 """
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -35,13 +36,14 @@ def _message_text(message: AIMessage) -> str:
 
 
 def market_gap_agent(state: AppIdeaState) -> dict:
-    """Turn ``pain_points`` into a market-gap analysis string.
+    """Turn ``pain_points`` into an idea-validation analysis.
 
     Args:
         state: Graph state. ``pain_points`` holds the prior analysis.
+            ``query`` is the market idea being validated.
 
     Returns:
-        An update that sets ``market_gaps`` to the solution analysis.
+        An update that sets ``market_gaps`` to the validation analysis.
     """
     pain_points = (state.get("pain_points") or "").strip()
     if not pain_points:
