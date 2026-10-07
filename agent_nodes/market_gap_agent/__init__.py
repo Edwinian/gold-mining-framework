@@ -1,13 +1,16 @@
 """Market gap node for the linear gold mining graph.
 
-Reads the pain-point analysis and writes an idea-validation analysis.
-It does not cover pricing or monetization. This node is invoked by the
-graph, not as its own command.
+Reads the pain-point analysis, answers the purpose worksheet, then writes
+an idea-validation analysis from those answers. It does not cover pricing
+or monetization. This node is invoked by the graph, not as its own command.
 """
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
-from gold_mining_framework.agent_nodes.market_gap_agent.prompt import PROMPT
+from gold_mining_framework.agent_nodes.market_gap_agent.prompt import (
+    PROMPT,
+    PURPOSE_PROMPT,
+)
 from gold_mining_framework.llm import get_chat_model
 from gold_mining_framework.state import AppIdeaState
 
@@ -35,15 +38,38 @@ def _message_text(message: AIMessage) -> str:
     return str(content)
 
 
+def _ask(system: str, human: str) -> str:
+    """Send one system prompt and one user message to the chat model.
+
+    Args:
+        system: Instructions for this step.
+        human: Idea, pain points, and any earlier answers.
+
+    Returns:
+        Plain text from the model response.
+    """
+    response = get_chat_model().invoke(
+        [
+            SystemMessage(content=system),
+            HumanMessage(content=human),
+        ]
+    )
+    return _message_text(response)
+
+
 def market_gap_agent(state: AppIdeaState) -> dict:
     """Turn ``pain_points`` into an idea-validation analysis.
+
+    The purpose worksheet is answered first. The market-gap analysis is
+    written from those answers.
 
     Args:
         state: Graph state. ``pain_points`` holds the prior analysis.
             ``query`` is the market idea being validated.
 
     Returns:
-        An update that sets ``market_gaps`` to the validation analysis.
+        An update that sets ``market_gaps`` to the purpose answers followed
+        by the validation analysis.
     """
     pain_points = (state.get("pain_points") or "").strip()
     if not pain_points:
@@ -51,13 +77,18 @@ def market_gap_agent(state: AppIdeaState) -> dict:
 
     idea = (state.get("query") or "").strip()
     header = f"Market idea: {idea}\n\n" if idea else ""
-    response = get_chat_model().invoke(
-        [
-            SystemMessage(content=PROMPT),
-            HumanMessage(content=f"{header}Pain points:\n\n{pain_points}"),
-        ]
+    source = f"{header}Pain points:\n\n{pain_points}"
+    purpose = _ask(PURPOSE_PROMPT, source)
+    analysis = _ask(
+        PROMPT,
+        f"{source}\n\nPurpose answers:\n\n{purpose}",
     )
-    return {"market_gaps": _message_text(response)}
+    return {
+        "market_gaps": (
+            f"## Define your purpose\n\n{purpose.strip()}\n\n"
+            f"## Market gap analysis\n\n{analysis.strip()}\n"
+        )
+    }
 
 
 __all__ = ["market_gap_agent"]

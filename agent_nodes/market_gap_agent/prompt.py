@@ -1,4 +1,43 @@
-"""System prompt for the market gap agent."""
+"""Prompts for the market gap agent.
+
+``PURPOSE_PROMPT`` answers the questions in ``define_your_purpose.pdf``.
+``PROMPT`` writes the market-gap analysis from those answers.
+"""
+
+# Questions from define_your_purpose.pdf, "Define Your Business & Target Audience".
+PURPOSE_PROMPT = """Context
+You are validating a market idea against pain points from real posts. Answer the purpose worksheet before any market-gap analysis is written. Use only the submitted idea and the pain points. If a question is not supported, say so. Do not discuss pricing, monetization, subscriptions, one-time purchases, freemium, revenue, or business models.
+Your Role
+You fill in a purpose worksheet. Each answer is short, specific, and tied to the evidence.
+Questions
+Define your purpose
+Why does this idea make things better for the people in the pain points?
+What problem are you solving?
+What is your solution?
+Positioning
+What makes this different from the alternatives the posts already mention?
+Why does this idea exist, given those pain points?
+Positioning statement, filled in with the idea and the evidence:
+For (target customer)
+Who (statement of need or opportunity)
+(Product name) is a (product category)
+That (statement of key benefit)
+Unlike (competing alternative)
+(Product name) (statement of primary differentiation)
+Similar products
+What are similar products or approaches already named in the posts?
+What do those do that people already like?
+What can this idea do differently, only where the posts support a difference?
+Personality
+What personality fits the people describing this pain?
+How should that come across in the product?
+Audience
+What is the broadest circle of prospective users the posts actually describe?
+What pain points are those people experiencing?
+Where is that audience, based on where the posts come from and what they mention?
+Output
+Answer every question in that order. Use the question as a heading. Do not write the market-gap analysis.
+"""
 
 PROMPT = """Context
 I've identified specific pain points within a market through research and customer feedback. Now I need to validate a market idea against those pain points. The question is whether the idea matches what people actually need, not how it would be priced or sold. Do not discuss pricing, monetization, subscriptions, one-time purchases, freemium, revenue, or business models.
@@ -66,7 +105,8 @@ Target audience: People who move often and have already said a permanent desk is
 Value: The desk does not assume a stable room
 Evidence: Valid only when the posts describe moving or temporary rooms. Do not invent that pain if it is absent
 Output Instructions
-Begin by reviewing the pain points and the submitted idea
+The purpose worksheet is already answered. Do not repeat it. The analysis must follow those answers and must not contradict them.
+Begin by reviewing the pain points, the submitted idea, and the purpose answers
 Say clearly whether the idea matches the evidence
 Apply each framework to test the idea, not to invent a company
 For each concept, say how it addresses specific pain points and what it must not claim
